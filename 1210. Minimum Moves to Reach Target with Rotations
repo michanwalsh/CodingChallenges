@@ -1,0 +1,148 @@
+class Solution:
+    def minimumMoves(self, grid: List[List[int]]) -> int:
+        
+        
+        #need to define position, head,tail
+        
+        #for memoizing a seen position, doesn't matter which way the snake is facing
+        
+        #seen position represented by the two squares occupied
+        
+        #can move down if both under are free, or right, or clockwise or counter
+        
+        #only four types of moves
+        
+        #but down is different if its vertically oriented than if hor
+        
+        #same for right actually, can move a vertical snake to the right
+        
+        #no need to distinguish head vs tail
+        
+        #need to keep track of orientation vertical or horizontal
+        
+        #just try hard coding all moves out to see if you can do them
+        
+        #and BFS with memo of two snake coords and moves
+        
+        #
+        m=len(grid)
+        n = len(grid[0])
+        def getmoves(head,tail):
+            nonlocal m
+            nonlocal n
+            #this could also be called get coords since that what it will return
+            headi,headj = head
+            taili,tailj = tail
+            #first, determine orientation
+            orient = None
+            if headi==taili:
+                orient = 'horiz'
+            else:
+                orient = 'vert'
+            newpos = []
+            if orient == 'horiz':
+                if tailj>headj:
+                    headi,taili, headj,tailj = taili,headi,tailj,headj
+                    #make rightmost as head
+                #try moving right
+                if headj+1 < n and grid[headi][headj+1]!=1:
+                    newpos.append(((headi,headj+1),(taili,tailj+1)))
+                
+                
+                #try moving down
+                if headi+1 < m and grid[headi+1][headj]!=1 and grid[taili+1][tailj]!=1:
+                    newpos.append(((headi+1,headj),(taili+1,tailj)))
+                    
+                
+                
+                
+                
+                #try rotating clock
+                if headi+1 < m and grid[headi+1][headj]!=1 and grid[taili+1][tailj]!=1:
+                    newpos.append(((taili+1,tailj),(taili,tailj)))
+                
+                
+#                 #try rotating counter
+#                 if taili+1<m and grid[taili+1][tailj]!=1:
+#                     newpos.append(((taili+1,tailj),(taili,tailj)))
+                    
+            elif orient == 'vert':
+                if taili>headi:
+                    headi,taili, headj,tailj = taili,headi,tailj,headj
+                #make head face down
+                #move down
+                if headi+1 < m and grid[headi+1][headj]!=1:
+                    newpos.append(((headi+1,headj),(headi,headj)))
+                #move right
+                if headj+1<n and grid[headi][headj+1]!= 1 and grid[taili][tailj+1]!=1:
+                    newpos.append(((headi,headj+1),(taili,tailj+1)))
+                #move clock
+                # if tailj+1<n and grid[taili][tailj+1]!=1 and grid[]:
+                #     newpos.append(((taili,tailj+1),(taili,tailj)))
+                #counter
+                if headj+1<n and grid[headi][headj+1]!=1 and grid[taili][tailj+1]!=1:
+                    newpos.append(((taili,tailj+1),(taili,tailj)))
+            
+            return newpos
+        #######################
+        
+        from collections import deque
+        #find the two pos of snake
+        #nvm, (0,0),(0,1)
+        q = deque()
+        
+        seen = {}
+        q.append((((0,0),(0,1)),0))
+        
+        
+        
+        def reorient(a,b):
+            headi,headj = a
+            taili,tailj = b
+            #first, determine orientation
+            orient = None
+            if headi==taili:
+                orient = 'horiz'
+            else:
+                orient = 'vert'
+            if orient == 'horiz':
+                if tailj>headj:
+                    headi,taili, headj,tailj = taili,headi,tailj,headj
+            elif orient == 'vert':
+                if taili>headi:
+                    headi,taili, headj,tailj = taili,headi,tailj,headj
+            return ((headi,headj),(taili,tailj))
+            #returns head,tail
+            
+        while q:
+            snake, moves = q.popleft()
+            head,tail = snake
+            head,tail = reorient(head,tail)
+            
+            if (head,tail) == ((n-1,n-2),(n-1,n-1)) or (tail,head)== ((n-1,n-2),(n-1,n-1)):
+                return moves
+            
+            
+            newpos = getmoves(head,tail)
+            
+            for pos in newpos:
+                if pos in seen and seen[pos] <= moves+1:
+                    continue
+                q.append(((pos),moves+1))
+                seen[pos] = moves+1
+        return -1
+                
+            
+            
+            
+            
+        
+        
+        
+        
+                
+                
+                
+                
+                
+            
