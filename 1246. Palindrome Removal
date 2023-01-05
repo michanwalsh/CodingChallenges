@@ -1,0 +1,14 @@
+class Solution:
+    def minimumMoves(self, arr: List[int]) -> int:
+        #
+        @lru_cache(None)
+        def dp(i,j):
+            if i>=j:
+                return 1
+            return dp(i+1,j-1) if arr[i]==arr[j] else min([dp(i,mid) + dp(mid+1, j) for mid in range(i,j)])
+        return dp(0,len(arr)-1)
+                                                           
+        
+        #
+                    
+            
