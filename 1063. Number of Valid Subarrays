@@ -1,0 +1,122 @@
+class Solution:
+    def validSubarrays(self, nums: List[int]) -> int:
+        #subarrays for each leftmost index
+        #guessing nsquared is too slow
+        #how to get first indexx for each i that num is smaller than at i
+        #if we sort them then by looking through the smaller side for the one with the smallest index greater than i that cuts the time in half
+        #not tha thelpful
+        
+        #well actually if we sort it then for each number, sort all the smaller numbers by the index they occur at
+        #then we can binary search the sorted list of indexes for the first index that appears after i
+        
+        
+        #that's NlogN to sort, then for each index sorting its left side by index, NLogN, then for each index binary searching that sorted which is another N**2logN, that should work
+        
+        n = len(nums)
+        
+        
+        stack = []
+        
+        ans = 0
+        
+        def get(i,right):
+            return max(1,right-i)
+        
+        for i in range(n-1,-1,-1):
+            while stack and nums[i] <= stack[-1][0]:
+                stack.pop()
+            if stack:
+                ans += get(i,stack[-1][1])
+                stack.append([nums[i],i])
+            else:
+                ans += get(i,n)
+                stack.append([nums[i],i])
+        return ans
+        sortednums = sorted([(d,i) for i,d in enumerate(nums)])
+        
+        ans = 0
+        smallerthannumbyindex = {}
+        smallers = []
+        for i,(num,index) in enumerate(sortednums):
+            if num in smallerthannumbyindex:
+                #print('ok')
+                bisect.insort(smallers,index)
+                continue
+            
+            
+            
+            smallerthannumbyindex[num] = copy.deepcopy(smallers)
+            #print(num,smallers)
+            bisect.insort(smallers,index)
+        
+        #maybe instead of sorting each time, just insort the index itself for each group of indexes of equal numbers you encounter as you go along
+        #print(smallerthannumbyindex)
+        
+        n = len(nums)
+        for i in range(len(nums)):
+            num = nums[i]
+            smallers = smallerthannumbyindex[num]
+            right = None
+            x = bisect.bisect_right(smallers,i)
+            
+            while x < len(smallers) and smallers[x] <=i:
+                x += 1
+            if x==len(smallers):
+                right = n
+            else:
+                right = smallers[x]
+            
+            def getcount(i,right):
+                dist = right-i
+                return max(1,dist)
+            #print(i,right,getcount(i,right))
+            ans += getcount(i,right)
+            
+        return ans
+            
+            
+        #they want a linear solution
+        
+        #something stack
+        
+        #going right to left, if we encounter a smaller number, we can discard larger numbers to the right, as the smaller number would be smaller than anything on the left before any bigger on the right would be
+        
+        #so right to left we can pop until the new number is larger than on the stack so that it's an increasing stack
+        #
+        
+        
+        
+        stack = []
+        
+        ans = 0
+        
+        def get(i,right):
+            return max(1,right-i)
+        
+        for i in range(n-1,-1,-1):
+            while nums[i] <= stack[-1][0]:
+                stack.pop()
+                if stack:
+                    ans += get(i,stack[-1][1])
+                    stack.append([nums[i],i])
+                else:
+                    ans += get(i,n)
+                    stack.append([nums[i],i])
+        return ans
+                    
+                
+        
+        
+        
+        
+        
+        
+        
+        
+            
+            
+            
+            
+            
+        
+        
