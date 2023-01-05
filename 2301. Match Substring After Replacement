@@ -1,0 +1,42 @@
+class Solution:
+    def matchReplacement(self, s: str, sub: str, mappings: List[List[str]]) -> bool:
+        #add all maps for each char to a list in dic or set
+        #go through all substrings of sub len in s
+        #try to replace
+        
+        dic = collections.defaultdict(set)
+        for st,e in mappings:
+            dic[st].add(str(e))
+        sn = len(sub)
+        n = len(s)
+        # print(n,sn)
+        # print(dic)
+        for i in range(len(s)-len(sub)+1):
+            can = True
+            subi = 0
+            # print(i)
+            for j in range(i, i+len(sub)):
+                
+                if sub[subi]==s[j]:
+                    subi += 1
+                    continue
+                # print(dic[sub[subi]])
+                # print(s[j], dic[sub])
+                if not dic[sub[subi]]:
+                    can = False
+                    break
+                curs = str(s[j])
+                curset = dic[sub[subi]]
+                # print(curset,curs)
+                if curs in curset:
+                    subi += 1
+                    continue
+                # elif curs in dic[sub[subi]]:
+                #     subi += 1
+                #     continue
+                else:
+                    can = False
+                    break
+            if can:
+                return True
+        return False
