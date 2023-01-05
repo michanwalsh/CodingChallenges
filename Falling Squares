@@ -1,0 +1,58 @@
+class Solution:
+    def fallingSquares(self, positions: List[List[int]]) -> List[int]:
+        #need to keep track of cur tops of squares
+        #as well as cur max height of any stack of squares
+        
+        #record the range of x values a dropped square now occupies as well as the height that it occupies it at
+        #list of ranges squares are at can be in a dictionary with tuple key and height value
+        #then if a square is dropped on top of another, you'd replace the part of the interval it covered with the new interval for that square
+        #first, (1,3):2
+        #then, (2,5), we see that it intersects
+        #but what if we have two squares it could fall on, but one is taller?
+        #search the range of the new square maybe to see the intersecting range with the biggest height?
+        #only 1000 squares, you could just search the array of current ranges really
+        #keep track of every place it intersects
+        #for every range it intersects with, you'll definitely have to shorten that range no matter what the height is
+        #so do so as you go along
+        #then just keep track of the max height of all intersected ranges
+        #then finally add the new square range with its max height plus side length as the ne wrange's height
+        
+        #keep a global variable max height which is just our answer after each square
+        #
+        ranges = []
+        curmax = 0
+        ans = []
+        
+        def helper(a,b):
+            nonlocal curdrop
+            la,ra,ah=a
+            lb,rb = b
+            #encompass can return encompass, simply delete the a range, take its height for new range
+            #partial can split the range 
+            #or maybe we don't need to delete ranges really
+            #so we just need to check whether there's any overlap and return true
+            if lb>= la and lb<ra:
+                return True
+            if rb<=ra and rb>la:
+                return True
+            if lb<la and rb>ra:
+                return True
+            return False
+            
+            
+        
+        for left,sidel in positions:
+            
+            curdrop = 0
+            l,r = left, left + sidel
+            #
+            for range in ranges:
+                la,ra,ah = range
+                if helper(range,(l,r)):
+                    curdrop = max(curdrop, ah)
+                
+            ranges.append((l,r,curdrop+sidel))
+            curmax = max(curdrop+sidel, curmax)
+            ans.append(curmax)
+        return ans
+            
