@@ -1,0 +1,186 @@
+class Node:
+    def __init__(self,number):
+        self.children = []
+        self.val = number
+class Tree:
+    def __init__(self,n,edges,query):
+        self.edges = edges
+        self.query = query
+        # self.root = Node(0)
+        self.parents = {}
+        self.seen = set()
+        self.ysdic = {}
+        self.adj = collections.defaultdict(list)
+        self.numtonode = {}
+        newedges = []
+        for a,b in edges:
+            if a not in self.numtonode:
+
+                aa = Node(a)
+                self.numtonode[a]=aa
+            else:
+                aa = self.numtonode[a]
+            if b not in self.numtonode:
+                bb= Node(b)
+                self.numtonode[b]=bb
+            else:
+                bb = self.numtonode[b]
+
+            newedges.append((aa,bb))
+
+
+        for a,b in newedges:
+            self.adj[a].append(b)
+            self.adj[b].append(a)
+
+        def addnode(self,node,prev,y):
+
+            self.ysdic[node]=y
+            if prev and prev.val >=0:
+                self.parents[node]=prev
+
+            for child in self.adj[node]:
+                if child != prev:
+                    new = child
+                    node.children.append(new)
+                    addnode(self,child,node,y+1)
+        dum = Node(-1)
+        dum.children.append(self.numtonode[0])
+        for child in dum.children:
+            addnode(self,child,dum,0)
+
+    def getLCA(self,a,b):
+        ay,by = self.ysdic[a],self.ysdic[b]
+        cura = a
+        curb = b
+        if ay > by:
+            cura = a
+            for i in range(ay-by):
+                cura = self.parents[cura]
+        elif by > ay:
+            curb = b
+            for i in range(by-ay):
+                curb = self.parents[curb]
+       # print(cura.val,curb.val)
+        while cura != curb:
+            cura = self.parents[cura]
+            if curb not in self.parents:
+                print(curb.val,'ok',a.val,b.val)
+            curb = self.parents[curb]
+        return cura
+
+    def answer(self,s,e,n):
+        
+        s = self.numtonode[s]
+        e = self.numtonode[e]
+        n = self.numtonode[n]
+        se = self.getLCA(s,e)
+        sn = self.getLCA(s,n)
+        en = self.getLCA(e,n)
+
+        if sn==en:
+            return se.val
+        elif se==sn:
+            return en.val
+        else:
+            return sn.val
+
+
+    def call(self):
+
+        ans = []             
+        for a,b,c in self.query:
+            ans.append(self.answer(a,b,c))
+        return ans
+
+class Solution:
+    def closestNode(self, n: int, edges: List[List[int]], query: List[List[int]]) -> List[int]:
+        if not edges:
+            return [0]*len(query)
+        t = Tree(n,edges,query)
+        
+        return t.call()
+        #could map all 1000 nodes to every other node with min distance to each other
+        
+        #if it is a tree there is only one path
+        #LCA of start and end, parent backtrack til you get to LCA to find path
+        #take min of map for all nodes between
+        
+        #buildinig the map might be the hard part
+        
+        #a bfs for each pair of nodes
+        #but, maybe just one bfs
+        #as in, start from one node
+        #once you get to dist 1 away, immediately update
+        #once you get to dist 2 away, immediately update, etc
+        #so only N bfss
+        
+        #or maybe not, if its a tree, can do easier
+        #for every pair of nodes
+        #for every node, it is the only intersection point for all of its childrens paaths' nodes with eachother
+        #and the distance will only be the distance from each leaf to the int point plus the other leaf to the int point
+        
+        #and the dist from each leaf to the int point is jut the differences in y between leaf and int point
+        #this is still N**2 though, same as N BFSs?
+        #this one seems cooler though, maybe a little faster
+        
+        #from leaf up, pass a set of nodes including the cur node
+        #all are already mapped ot their y
+        #then the function will obtain a set for each node's child, will compare two sets at a time
+        #and go node for node in each pair of sets
+        #then finally unioning the sets and passing that up
+        
+        
+        #or maybe you don't need to do all of this
+        
+        #how many cases
+        #could get LCA for s,e, for s,n, for e,n
+        #if y of s,n deeper than e,n no that still doesn't guarantee anything
+        
+        #but, you can just use LCAs only I think
+        
+        #closest node will be one of these three LCAs
+        
+        #if s,n and e,n LCA is same point, then node is outside of s,e path
+        #in which case s,n e,n LCA is closest node
+        
+        #elif they're different, it's under one of them's
+        #if LCA of s,n is not that of s,e, it's closer to s than e, return LCA of s,n
+        #else, it's closer to e, return e,n LCA
+        
+        #
+        
+        #also need to set up the tree somehow
+        
+        
+        
+        
+             
+            
+        return Tree.call(self)
+        #print(Tree(n,edges,query))
+        return
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
