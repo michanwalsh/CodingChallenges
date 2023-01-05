@@ -1,0 +1,89 @@
+class Solution:
+    def distinctSubseqII(self, s: str) -> int:
+        #distinct
+        #distinct subs from an index to the end
+        #but then would have to check with one your combining with on the left to see if its distinct
+        
+        #could represent a sub by a string, or by a mask of indicies present in s
+        #but you want to make sure that there is at least one unique about this sub
+        #so cant have same chars at every pos in substirng
+        #so could do of length up to whatever
+        #
+        #so if you dfs on masks of indicies, only length 2000 that's 2**2000?
+        #but along the way, keep track of strings of length x you've gotten so far to eliminate dup searching
+        #maybe if you've searched a prev letter at some index like 5, and there was already an a that came after it, you would've already searched it, so don't bother searching some other a after that first a if your last index is still 5
+        #would that help
+        #mark a last, then for every index the first characters that appear after that index
+        #first a that appears after, first b that appears after, etc
+        #using reverse stack n-1,-1 most recent of each letter
+        #then for each given last index in your mask, only search the next of each letter
+        #could still get duplicates though
+        
+        #well actually, if you init your first last as -1 and only search from that
+        #you'll start by searching on the first of each letter
+        
+        #try that
+        
+        #dp version?
+        #subs starting at a ind?
+        #then if you get to an ind with the dfs, each time with a different sub, you can multilpy right and left toghet
+        #for a letter, you can start at any of the following first instances of a letter
+        #so if  you go backwards, then at -2, you'd figure out how many you could get by starting a new to the right with each of the letters first occur after -2
+        #add them all together, dps of each next letter occ
+        #also include adding nothing, +1
+        #then return that sum as dp of a current lastind
+        #
+        
+        lasts = [[-1 for i in range(26)] for i in range(len(s)+1)]
+        for i in range(26):
+            char = chr(i+97)
+            
+        recents = [-1 for i in range(26)]
+        n= len(s)
+        for i in range(n-1,-1,-1):
+            cur = s[i]
+            for j in range(26):
+                lasts[i+1][j] = recents[j]
+            recents[ord(cur)-97] = i
+        for j in range(26):
+                lasts[0][j] = recents[j]
+           
+        
+        #print(lasts)
+        ans = 0
+        letsfoundafter = collections.defaultdict(list)
+        for i in range(n):
+            for j in range(26):
+                if lasts[i+1][j] != -1:
+                    letsfoundafter[i].append(j)
+        memo = {}
+        def dfs(lastind):
+            nonlocal memo
+            if lastind in memo:
+                return memo[lastind]
+            nonlocal ans
+            
+            nonlocal letsfoundafter
+            letsfound = letsfoundafter[lastind]
+            cur =1
+            for i in letsfound:
+                #if lasts[lastind+1][i] != -1:
+                #newind = lasts[lastind+1][i]
+                cur += dfs(lasts[lastind+1][i])
+            memo[lastind] = cur
+            return cur
+        final = 0
+        for i in range(26):
+            if lasts[0][i] != -1:
+                newind  =lasts[0][i]
+                final += dfs(lasts[0][i])
+                #dfs(lasts[0][i],[newind])
+        return final%(10**9 +7)
+                    
+        #either add the next occ of a letter or don't add another occ of that letter at all (until you've added some other letter first)
+        #you could always just stop the subsequennce where it is if it isn't empty
+            
+            
+            
+        
+            
