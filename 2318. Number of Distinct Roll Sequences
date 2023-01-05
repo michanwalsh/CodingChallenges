@@ -1,0 +1,43 @@
+class Solution:
+    def distinctSequences(self, n: int) -> int:
+        #cond1 no 2,4, or 3,6, or 2,6, or 4,6
+        #given a last two rolls, what can you roll next
+        #cause if 2,3, then can't roll a 2 or a 3, but can roll anything else
+        #so dp on a last two rolls, num of remaining rolls
+        #can use your last two lookup to see possible next roll
+        lmemo = {}
+        def lasttwolookup(a,b):
+            if (a,b) in lmemo:
+                return lmemo[(a,b)]
+            
+            ans = []
+            for i in range(1,7):
+                if i==a or i==b:
+                    continue
+                if  (not b%2) and (not i%2):
+                    continue
+                if (b==6 or b==3) and (i==6 or i==3):
+                    continue
+                ans.append(i)
+            lmemo[(a,b)]=ans
+            return ans
+        
+        mod = 10**9 + 7
+        memo ={}
+        def dp(a,b,left):
+            if not left:
+                return 1
+            nonlocal memo
+            if (a,b,left) in memo:
+                return memo[(a,b,left)]
+            
+            cur = 0
+            nexts = lasttwolookup(a,b)
+            
+            for pos in nexts:
+                cur += dp(b,pos,left-1)
+            
+            
+            memo[(a,b,left)] = cur
+            return cur
+        return dp(-1,-1,n)%mod
