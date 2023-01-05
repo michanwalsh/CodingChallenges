@@ -1,0 +1,67 @@
+class Solution:
+    def palindromePartition(self, s: str, k: int) -> int:
+        #map palindromes and their indexes
+        #starting at beginning, try to get to the end
+        
+        #has to be exactly k
+        #maybe record for each possible substring how many char changes nec to make it a palindrome
+        #then maybe try all possible k-1 partitiions
+        #dp[i][j] could be that first one of char changes nec for palindrome i:j
+        
+        #before trying all possible substrings, first try all possible partitions?
+        #anytime you get a valid partition, go back and create the dp for those partitions
+        #then next time you find a valid partition, you may already have the dp for some of those partitions
+        
+        #how to calculate how many nec changes easily?
+        
+        #just go inward from edges, plus 1 if they don't match, plus zero if they do until you hit center
+        #
+        memo = {}
+        def changes(i,j):
+            if (i,j) in memo:
+                return memo[(i,j)]
+            
+            string = s[i:j]
+            c = 0
+            l,r = 0,len(string)-1
+            while l<r:
+                if string[l] != string[r]:
+                    c += 1
+                l+=1
+                r -= 1
+            memo[(i,j)] = c
+            return c
+        
+        dp = {}
+        dp[(len(s),0)] = 0
+        for i in range(len(s)-1,-1,-1):
+            dp[(i,1)] = changes(i,len(s))
+            for j in range(i+1, len(s)+1):
+                
+                for kk in range(2,min(k+1, len(s)-j+2)):
+                    if (i,kk) not in dp:
+                        dp[(i,kk)]=float('inf')
+                    if (j,kk-1) not in dp:
+                        dp[(j,kk-1)] = float('inf')
+                    print(i,j,changes(i,j))
+                    # print(i,j,kk,changes(i,j))
+                    dp[(i,kk)] = min(dp[(i,kk)], (changes(i,j) + dp[(j,kk-1)]))
+        print(dp)
+        return dp[(0,k)]
+                
+                
+                
+                
+                
+                
+                    
+                    
+                    
+                    
+        
+        
+        
+        
+        
+        
+        
