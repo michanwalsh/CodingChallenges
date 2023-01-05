@@ -1,0 +1,122 @@
+class Solution:
+    def minimumTime(self, s: str) -> int:
+        #if edge is 1, remove it
+        #if both edges are 0
+        #find the nearest one to an edge, if its the last 1, just pay 2 and remove
+        #if not, might be better to remove 0 edges so you don't have to pay 2 for future 1s
+        #if there's a 1 1 away from the edge, just remove the 0 and then the 1
+        #count how many inside 1s there are
+        #rec on two sub problems?
+        #either remove 0s until you get to the 1
+        #or just remove the 1
+        #if you remove the 1 by paying, you're basically conceding ok, I'm never gonna remove from this 0 edge again, or else I should have done that in the first place instead of paying
+        #so once you decide to pay, then that's it, you're not removing any edges in the future, just paying
+        #so only do this if 2*all the inner 1s left is less than the sub problem o removing the min number of edges to find a 1 + the sub problem for whatever is left over
+        #
+        #ie distance from nearest 1 + self on leftover
+        #if it's better, pay 2 for all 1s and call it a wrap
+        #
+        
+        
+#         def rec(a,b):
+#             i = a
+#             j = b
+#             if i>j:
+#                 return 0
+            
+#             ans = 0
+#             while i <= j and (s[i] == '1'):
+#                 ans += 1
+#                 i += 1
+#             while i <=j and (s[j] =='1'):
+#                 ans += 1
+#                 j -= 1
+                
+                
+#             while i <= j and (s[i] == '1' or (i+1<=j and s[i+1]=='1')):
+#                 ans += 1
+#                 i += 1
+#             while i <=j and (s[j] =='1' or (j-1>=i and s[j-1]=='1')):
+#                 ans += 1
+#                 j -= 1
+#             x= sum([int(char) for char in s[i:j+1]])
+            
+#             left = 0
+#             lefti=i
+#             while lefti <=j and s[lefti] == '0':
+#                 left += 1
+#                 lefti += 1
+            
+#             right = 0
+#             righti= j
+#             while righti >=i and s[righti] == '0':
+#                 right += 1
+#                 righti -= 1
+                
+                
+            
+#             if x:
+#                 return min(ans+2*x, ans + left + rec(lefti,j), ans + right + rec(i, righti))
+#             else:
+#                 return ans
+            
+        
+            
+            #if at any point coming from right, the cost of removing another block exceeds the cost of just
+            #counting our losses, just count or losses
+            #until then, remove another block
+            #init best as losses
+            #init losses as 2*total number of 1s
+            #init spent as 0
+            #for every 0 block, pay 1
+            #for every 1 block, pay 1, but dec losses by 2 (1 less 1 to spend 2 on)
+            #whenever losses - spent is better than best, update it
+            #go until either exha search space or no more losses (no more 1s to be found)
+            
+            #can you find without in one sweep?
+            #keep track of how many 1s after a point, best is 2*total 1s after that point
+            #it will 
+            #n2 is fine
+            n = len(s)
+            after = [0 for i in s]
+            lastbest = float('inf')
+            for i in range(n-1,-1,-1):
+                if i == n-1:
+                    if s[i]=='1':
+                        after[i] = 1
+                        lastbest = 1
+                    else:
+                        lastbest = 0
+                    continue
+                let = s[i]
+                if let == '1':
+                    lastbest += 2
+                    lastbest = min(n-i, lastbest)
+                else:
+                    after[i] = min(after[i+1], n-i)
+                    
+                after[i] = lastbest
+                
+            
+            before = [0 for i in s]
+            cost = 0
+            for i in range(n):
+                if s[i]=='1':
+                    cost = i+1
+                before[i] = cost
+            
+            #either last best cost + 2, or n-i
+            #at any point n-i can always be better
+            #
+            out = float('inf')
+            for i in range(1,n-1):
+                out = min(out, before[i]+after[i] )
+            out = min(out, after[0], before[n-1])
+            return out
+            return min([a+b for (a,b) in zip(before+[0],[0]+after)])
+            
+            
+            
+                
+#         return rec(0,len(s)-1)
+        
