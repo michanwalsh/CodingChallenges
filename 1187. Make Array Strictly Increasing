@@ -1,0 +1,134 @@
+class Solution:
+    def makeArrayIncreasing(self, arr1: List[int], arr2: List[int]) -> int:
+        #minimum to make increasing without changing any to the right
+        #do for each prefix
+        #1,8,9,4
+        #either change the 1,8,9,4
+        #pick some number to not change
+        #then try for all that perhaps middle number
+        #call a function on the left side of that middle and on the right side
+        #left function should end with a value lower than middle
+        #right should begin with a value higher than middle
+        #for left function, if rightmost value of left substring is already higher or equal to middle, it needs to be changed
+        #may as well choose the biggest value on arr2 that is still lower than middle
+        #so either you change it or you don't
+        #calling two functions recursively
+        #if you don't change it, pass back 0 + the left call for the substring of one fewer, now passsing this unchanged value as the middle
+        #if you do change it, pass back 1 + the left call for the susbtring of one fewer, now passing the highest passing value as the middle
+        #either way, call the one that changes it
+        #compare the minimum that is returned between the two at each stage. 
+        #that minimum will be the fewest necessary changes to make the left substring work with the middle you have chosen.
+        
+        #do a similar thing with the right side.
+        #if you can successfully do this wiith both the left and the right, add left and right and compare with final answer for minimum
+        
+        
+        #do this for all middles (unchanged)
+        #but you may also have to change everything. If this is the case, the answer would be found by sorting arr2, or just getting a distinct count of numbers in arr2, and if it's at least as much as the size of arr1, return that count
+        #if not return -1
+        
+        
+        final = float('inf')
+        n1 = len(arr1)
+        n2 = len(arr2)
+        arr2 = list(set(arr2))
+        arr2.sort()
+        #print(arr2)
+        
+        leftmemo = {}
+        rightmemo = {}
+        def callleft(rightind, ceilingval):
+            nonlocal leftmemo
+            if (rightind,ceilingval) in leftmemo:
+                return leftmemo[(rightind,ceilingval)]
+            nonlocal rightmemo
+            #print(rightind,ceilingval)
+            #how to get the max good val from arr2
+            
+            curbest = float('inf')
+            if rightind < 0:
+                curbest = 0
+                return curbest
+            if arr1[rightind] < ceilingval:
+                curbest = min(curbest, callleft(rightind-1, arr1[rightind]))
+            nextbestind = bisect.bisect_left(arr2, ceilingval)
+            #print(nextbestind, ceilingval)
+            #print(rightind,ceilingval, nextbestind)
+            if nextbestind < len(arr2):
+                #if nextbestind > 0 and arr2[nextbestind-1] < ceilingval:
+                if nextbestind > 0 and arr2[nextbestind] >= ceilingval:
+                    nextbestind -= 1
+                newmid = arr2[nextbestind]
+                if newmid < ceilingval:
+                    #and newmid >= arr1[rightind]:
+                    curbest = min(curbest, 1+callleft(rightind-1,newmid))
+           # print(rightind,ceilingval,curbest)
+            leftmemo[(rightind,ceilingval)] = curbest
+            return curbest
+            
+        def callright(leftind, ceilingval):
+            nonlocal rightmemo
+            if (leftind,ceilingval) in rightmemo:
+                return rightmemo[(leftind,ceilingval)]
+            #print(leftind,ceilingval)
+            curbest = float('inf')
+            if leftind >= len(arr1):
+                curbest = 0
+                return curbest
+            if arr1[leftind] > ceilingval:
+                curbest = min(curbest, callright(leftind+1, arr1[leftind]))
+            nextbestind = bisect.bisect_left(arr2, ceilingval) 
+            if nextbestind < len(arr2) and arr2[nextbestind] <= ceilingval:
+                nextbestind += 1
+            if nextbestind < len(arr2):
+                
+                newmid = arr2[nextbestind]
+                #print(newmid,leftind,ceilingval)
+                if newmid > ceilingval:
+                #and newmid <= arr1[leftind]:
+                    curbest = min(curbest, 1+callright(leftind+1,newmid))
+            rightmemo[(leftind,ceilingval)] = curbest
+            return curbest
+           
+            
+        
+        for m in range(n1):
+            #if m != 5:
+               # continue
+            midnum = arr1[m]
+            #if left is valid given this mid
+            #and right is valid given this mid
+            #add them and compare with final
+            #else continue to next mid
+            left = callleft(m-1,midnum)
+            #print('left',m,left)
+            if left == float('inf'):
+                continue
+            
+            right = callright(m+1,midnum)
+            if right == float('inf'):
+                continue
+            #print('rigt',m,right)
+            final = min(final, left + right)
+        if len(arr2) >= len(arr1):
+            final = min(final, len(arr1))
+        if final == float('inf'):
+            return -1
+        else:
+            return final
+                
+                
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
