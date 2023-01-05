@@ -1,0 +1,102 @@
+class Solution:
+    def minScore(self, grid: List[List[int]]) -> List[List[int]]:
+        #find the absolute minimum, it wouldn't hurt to replace it with 1
+        
+        #can we replace the next smallest with 2
+        #this is like  a 2 dimensional birthday coins or whatever
+        #could we use topo sort
+        
+        #
+        #ok so top sort
+        #map each number to the number in its row immediately larger than it (and vice versa to from adj dics)
+        #and the number in its col immediately larger than it
+        
+        #inevitably some will have an indegree of 0
+        
+        #also create a maxsofar for each node init to 1
+        
+        #first we do the ones with indegree of 0, assign them to be 1
+        #find their largers, should be max of two each
+        #dec larger indegree, update its maxsofar to be max(maxsofar), child + 1
+        #if larger indegree is 0, put it on the queue (its number is set, its maxsofar is its final number)
+        
+        #just keep doing this 
+        
+        parents = collections.defaultdict(list)
+        indegrees= collections.defaultdict(int)
+        #the nodes are distincnt can be represente dby their numbers
+        
+        maxsofar = {}
+        
+        ##go row by row, get the row, sort it
+        
+        m,n = len(grid),len(grid[0])
+        
+        from collections import deque
+        
+        for i in range(m):
+            
+            #get rows
+            row = copy.deepcopy(grid[i])
+            row.sort()
+            for i in range(1,len(row)):
+                parents[row[i-1]].append(row[i])
+                indegrees[row[i]] += 1
+        for j in range(n):
+            col = []
+            for i in range(m):
+                col.append(grid[i][j])
+            col.sort()
+            
+            for i in range(1,len(col)):
+                parents[col[i-1]].append(col[i])
+                indegrees[col[i]] += 1
+        print(indegrees,'in')
+        q = deque()
+        for i in range(m):
+            for j in range(n):
+                
+                maxsofar[grid[i][j]]= 1
+                if grid[i][j] not in indegrees:
+                    q.append(grid[i][j])
+        print(q)
+        while q:
+            cur = q.popleft()
+            
+            for par in parents[cur]:
+                indegrees[par] -=1 
+                maxsofar[par] = max(maxsofar[par],maxsofar[cur]+1)
+                if indegrees[par]==0:
+                    q.append(par)
+            
+        print(maxsofar.items())  
+        for i in range(m):
+            for j in range(n):
+                grid[i][j] = maxsofar[grid[i][j]]
+        return grid
+                
+                
+                
+                
+                
+            
+            
+            
+            
+        
+        
+        
+        
+        
+        
+        
+                
+            
+            
+            
+            
+            
+            
+            
+            
+            
