@@ -1,0 +1,208 @@
+class Solution:
+    def minimumDistance(self, word: str) -> int:
+        #problem is sividng work into two subsqs one for each finger to minimize score for boths sum
+        
+        #try all combinations of subsq?
+        #keep global best
+        #if worse than best don't bother
+        #is there a smart way to search 
+        #always start first letter with one finger, finger a
+        #maybe try to assign the letters farthest from finger a to finger b
+        #dfs
+        
+        #create your last letter to next letter distance function
+        
+        
+        
+        #try a dp
+        #having arrived at a given index for finger a and a given index for finger b, what is the best score we can finish the string with (score for a from now til end of string and same for b)
+        #so dp of (aind,bind) = best to finish
+        
+        #would also be same for (bind,aind)
+        #then if you ever reach again, already know
+        
+        #baase cases
+        #well a and b will never be on same index
+        #one has to hit the last index, we can say a
+        #then b could end anywhere as well
+        #but if b doesn't end at a-1, it's assumed a typed all the letters after b
+        #either way, ans if a or b is at last is 0, cause no more letters to be typed
+        #what if one isn't at last
+        #like b at -6, a at -2
+        #then dp(-6,-2) is either a types last or b types last, so score of best of those options
+        #what about (-6,-3)
+        #someone has to type the net one(-2). so either score of a typing -2 plus dp(-2,-3) or other way around
+        #etc
+        
+        distmemo = {}
+        dpmemo = {}
+        def dp(aind,bind):
+            n=len(word)
+            if aind==n-1 or bind==n-1:
+                return 0
+            #aind bind represent the last (accounted for scorewise) indices a and b have been on
+            nonlocal dpmemo
+            if (aind,bind) in dpmemo or (bind,aind) in dpmemo:
+                return dpmemo[(aind,bind)]
+            
+            n = len(word)
+            
+            curbest = float('inf')
+            
+            nextlet = max(aind,bind) + 1
+            
+            def getdist(prev,cur):
+                if prev == -1:
+                    return 0
+
+                nonlocal distmemo
+                if (prev,cur) in distmemo:
+                    return distmemo[(prev,cur)]
+                p = word[prev]
+                c = word[cur]
+                def getcoord(let):
+                    num = ord(let) - 65
+
+                    i = num//6
+                    j = num%6
+                    return (i,j)
+
+                xa,ya = getcoord(p)
+                xb,yb = getcoord(c)
+                xdist = max(xa-xb, xb-xa)
+                ydist = max(ya-yb,yb-ya)
+                distmemo[(prev,cur)] = xdist+ydist
+                return xdist+ydist
+            curbest = min(curbest, getdist(aind,nextlet) + dp(nextlet,bind), getdist(bind,nextlet) + dp(aind,nextlet))
+            
+            
+            
+            
+            
+            
+            dpmemo[(aind,bind)] = curbest
+            dpmemo[(bind,aind)]=curbest
+            return curbest
+            
+            
+        return dp(0,-1)
+        
+        
+        
+        
+        
+        
+        distmemo = {}
+        def getdist(prev,cur):
+            if prev == -1:
+                return 0
+            
+            nonlocal distmemo
+            if (prev,cur) in distmemo:
+                return distmemo[(prev,cur)]
+            p = word[prev]
+            c = word[cur]
+            def getcoord(let):
+                num = ord(let) - 65
+                
+                i = num//6
+                j = num%6
+                return (i,j)
+            
+            xa,ya = getcoord(p)
+            xb,yb = getcoord(c)
+            xdist = max(xa-xb, xb-xa)
+            ydist = max(ya-yb,yb-ya)
+            distmemo[(prev,cur)] = xdist+ydist
+            return xdist+ydist
+        maskmemo = {}
+        def getscore(wordmask):
+            nonlocal maskmemo
+            if wordmask in maskmemo:
+                return maskmemo[wordmask]
+            prev = None
+            score = 0
+            for i in range(len(word)):
+                if wordmask & 1 <<i:
+                    if prev == None:
+                        prev = word[i]
+                    else:
+                        #print(getdist(prev,word[i]),prev,word[i])
+                        score += getdist(prev,word[i])
+                        prev = word[i]
+            maskmemo[wordmask] = score
+            return score
+        mask = 0
+        
+        mask ^= 1 << 0
+        mask ^= 1 << 1
+       # print('a', getscore(mask))
+        #
+        best = float('inf')
+        count = 0
+        seen = {}
+        def dfs(curi,wordamask, curscore,lastlet, wordbmask, lastletb):
+            nonlocal best
+            nonlocal seen
+            if (wordamask,wordbmask) in seen or (wordbmask,wordamask) in seen:
+                return
+            seen[(wordamask,wordbmask)]=1
+            seen[(wordbmask,wordamask)]=1
+            nonlocal count
+            if count >10000000: return
+            count +=1 
+            n = len(word)
+            #print(curscore)
+            if curscore >best:
+               # print(curscore,best)
+                return
+            if curi==n:
+                wordamask ^= 1 << curi
+                
+                #print(bin(wordamask),getscore(wordamask),bin(wordb))
+                
+                #compare scorea and scoreb with best
+                
+                #if scoreb+getscore(wordamask) == 4:
+                #print(bin(wordamask),getscore(wordamask), scoreb)
+                cur = curscore
+                
+                best = min(best,curscore)
+                return
+            
+            newi = curi+1
+            if newi==n:
+                dfs(newi,wordamask ^ 1<<newi, curscore,lastlet,wordbmask,lastletb)
+            else:
+                #dfs(newi, wordamask, curscore,lastlet)
+                if lastlet:
+                    if getdist(lastlet,word[newi]) < 5:
+                        newscore = curscore + getdist(lastlet,word[newi])
+                        dfs(newi,wordamask ^ 1<<newi, newscore,word[newi],wordbmask,lastletb) #searching with adding current to a letter
+                    if getdist(lastlet,word[newi])>2: #searching without adding current letter, aka adding to b
+                        if lastletb:
+                            newbscore = curscore + getdist(lastletb, word[newi])
+                            dfs(newi,wordamask, newbscore,lastlet,wordbmask ^1<<newi, word[newi])
+                        else:
+                            dfs(newi,wordamask, curscore,lastlet,wordbmask ^1<<newi, word[newi])
+                            
+                else:
+                    dfs(newi,wordamask ^ 1<<newi, curscore,word[newi],0,None) #adding first let to a always
+        dfs(-1,0,0,None,0,None)
+        return best
+                
+        #try to update both scores a and b in real time
+                
+        #some ways to optimize
+        #keep track of score as you go so you can compare with best and stop the search if it's worse
+        
+        #avoid moving a finger all the way across the board, there is probably another finger to do that with
+        #maybe more than 5 or 6, don't try it
+                
+                
+                
+                
+                
+                
+                
+                
