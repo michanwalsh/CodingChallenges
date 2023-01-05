@@ -1,0 +1,45 @@
+class StreamChecker:
+
+    def __init__(self, words: List[str]):
+        self.trie = {}
+        
+        def insert(word):
+            t = self.trie
+            for i in range(len(word)-1,-1,-1):
+                let = word[i]
+                if let in t:
+                    t = t[let]
+                else:
+                    t[let] = {}
+                    t = t[let]
+            t['-'] = True
+        for word in words:
+            insert(word)
+        
+        self.arr = []
+        
+        
+        
+    def query(self, letter: str) -> bool:
+        #create a backwards prefix trie
+        #check one by one until you can't or until you find a word or until there's no letters left if it's true
+        self.arr.append(letter)
+        t = self.trie
+        for i in range(len(self.arr)-1,-1,-1):
+            let = self.arr[i]
+            if '-' in t:
+                return True
+            if let in t:
+                t = t[let]
+                continue
+            else:
+                return False
+        if '-' in t:
+            return True
+        return False
+            
+        
+
+# Your StreamChecker object will be instantiated and called as such:
+# obj = StreamChecker(words)
+# param_1 = obj.query(letter)
