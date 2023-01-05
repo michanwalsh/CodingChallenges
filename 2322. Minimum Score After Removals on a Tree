@@ -1,0 +1,423 @@
+class Solution:
+    def minimumScore(self, nums: List[int], edges: List[List[int]]) -> int:
+        #would trying all edge pairs work 
+        #cause just trying would be kinda hard too so maybe the hardness is in the trying
+        #can you memoize components?
+        #components could be described as the nodes they consist of 
+        #so yeah I guess you could 
+        #but even then getting the xor of a component is easy, that's like O1 or O size of component
+        #even checking the identity of the component in memo is the same length
+        #ok so let's say brut eforce just checking each pair of edges
+        
+        #how to find the components given a pair of edges you've removed
+        #there can be a maximum of four nodes connected to at least one of the edges, minimum of three nodes
+        #each of the compoenets could be found by starting from one of the nodes
+        #and as long as you don't use the removed edges, just simple dfs would get all the nodes
+        
+        #so for each pair of edges, its the size of N nodes to check the anaswer
+        
+        #can you do better
+        
+        #maybe not, nothing comes to mind now
+        #just try brute force?
+        
+        nedges = len(edges)
+        #maybe you also want to check that exactly three components are created
+        #could use Union find for that
+        #or not necessary, just only start your dfs from a node attached to the pair if it already hasn't been reached
+        #also need to make sure all nodes are reached, so keep a global reached mask or something
+        ans = float('inf')
+        adj = collections.defaultdict(list)
+        n = len(nums)
+        for a,b in edges:
+            adj[a].append(b)
+            adj[b].append(a)
+            #################################################
+#         for i in range(nedges):
+#             for j in range(i+1,nedges):
+#                 r1 = edges[i]
+#                 r2 = edges[j]
+#                 seenmask = 0
+                
+#                 xors = []
+                
+#                 def dfs(curnode):
+#                     nonlocal seenmask
+#                     nonlocal adj
+#                     nonlocal curmask
+#                     nonlocal saw
+#                     if seenmask & 1 << curnode:
+#                         return
+#                     saw = True
+                    
+#                     curmask ^= nums[curnode]
+#                     seenmask ^= 1 << curnode
+#                     for nei in adj[curnode]:
+#                         op1 = [curnode,nei]
+#                         op2 = [nei,curnode]
+#                         if op1 == r1 or op1 == r2 or op2 == r1 or op2==r2:
+#                             continue 
+#                         dfs(nei)
+                
+#                 #get nodes attached to edges
+#                 starts = [r1[0],r1[1],r2[0],r2[1]]
+#                 for start in starts:
+#                     curmask = 0
+#                     saw = False
+#                     dfs(start)
+#                     #print(start,curmask)
+#                     if saw:
+#                         xors.append(curmask)
+#                 #print(xors)
+#                 if 2**n - 1 != seenmask:
+#                     continue
+#                 if len(xors) != 3:
+#                     continue
+#                 cur = max(xors)-min(xors)
+#                 ans = min(ans,cur)
+#         return ans
+                
+              ############################################  
+        #tle. memoize components somehow?
+        #
+        #or maybe figure out critical edges, then 
+        #forgot to check for all nodes visited
+        #maybe if there is some edge that is part of a cycle then removing it won't do anything
+        #unless you remove 2 edges from the same cycle, in which case you've only created 2 components not 3 ,not good enough
+        #so identify critical edges and only search from them
+        
+        #Or wait, if there are n-1 edges, and its a connected tree, meaning no islands, then no cycles 
+        #a tree cant even have cycles
+        #so take advantage of the treeness somehow
+        #if its a tree you can choose some node (any node i thiink) as the root and create a hierarchy of parents and children in relatio to that root
+        #then any time you choose two edges, it will necessarily be edges between a parent and one of its children
+        #each having a y value in the tree
+        #meaning some tree will for sure be created by taking  a child with nothing removed within its subtree (whose parent was disattached to it) and taking its subtree
+        
+        #so if any node after removals is the root of it complete original subtree, you can memoize that
+        
+        
+        #what are the different possibilities
+        #and how to get the parent tree, like how to memoize that
+        #also what if a node is the root of its subtree but not its complete subtree
+        #
+        #how to memoize that
+        #also to save time, after dfsing the first two components, you could just xor the full nodes and the seenmask so far to get the third components xor?
+        
+        
+        #so there will always be a component rooted at the original root
+        #then at some point, something will break off
+        #you'll have two new womponents with two new roots
+        
+        #maybe utilize xors of all complete subtrees rooted at each node
+        #then if you get to a point where you're removing, either you're going to remove again within that same subtree, or you'll remove again down some other path (if you haven't alreayd removed once)
+        #if its the second case, maybe its simpler
+        #like you want to find your og roots new mask and you 
+        #so two cases are for the two roots not og root, either one is the ancestor of the other or they share some other common ancestor
+        #if they share some other common ancestor, its simpler, just take the masks from each's complete subtree, and xor them together with the roots og mask to get the roots new mask
+        #and you can probably check whether its' this case using some ancestor dictionary
+        
+        #but if it's not this case, ie one is the ancestor of the other, then what
+        #then to get og root, need to figure out which one is the ancesotr of the other
+        #and just xor with his mask
+        #and to get the other two, get the smallest child's, his is his own, and xor with his parents to get his parents
+        
+        #ok
+        
+        
+        #now how to figure out which case, and which are which nodes
+        
+        #first need to set up a hierarchy, pick any node (0) as the og root
+        #turn it into a directed tree or something, making children etc
+        
+        #one its parents and children it will be easier
+        
+        #then assign eaech node a y value
+        #and for every pair of edges, there will be one child in each pair
+        #the children will serve as the parents of the new trees
+        #but before that, need to get xors of subtrees rooted at each node
+        #bottom up from leafs
+        #if leaf, assign its xor
+        #every parent will get xors of all its children, combine with itself, return its xor after memoizing it
+        
+        
+        #ok this is kinda complicated but it makes sense
+        #1
+        #first, remake tree into parent child tree, something i've never done before
+        #maybe dfs from 0 node, if seen return, else node = node.nei parent, node.nei = node's child, node.val = nums[node]
+        #now everything is attached to its parent and child and val, and you know the root
+        
+        ###2 you don't need to assing a y value probably
+        #2 obtain your xors for eeach node subtree by recursing on xors of children
+        #
+        
+        
+        
+        #3 for each pair, figure your two children in each pair
+        #get y values of each node actually, this will help in your ancestor search, map this out before hand
+        
+        #pick your higher y value, go up by parents till same y value, if they are same node it's case 1, else it's case 2 and they have some other ancestor, you will know what to do then
+        
+        #good OOP training
+        #####################step1
+        class Node:
+            def __init__(self,number):
+                self.label = number
+                self.val = None
+                self.children = []
+                self.parent = None
+        
+        seenmask = 0
+        numsToNode = {}
+        
+        def dfs(node,number):
+            nonlocal adj
+            nonlocal seenmask
+            nonlocal numsToNode
+            node.val = nums[number]
+            for nei in adj[number]:
+                if seenmask &1<<nei:
+                    continue
+                child = Node(nei)
+                numsToNode[nei] = child
+                
+                node.children.append(child)
+                child.parent = node
+                seenmask ^= 1<<nei
+                dfs(child,nei)
+        dum = Node(-1)
+        child = Node(0)
+        numsToNode[0] = child
+        root = child
+        dum.children.append(child)
+        seenmask ^= 1<<0
+        dfs(child,0)
+        
+        #maybe it worked
+        
+        #####try to build map of node number to y value
+        ysdic = {}
+        def getys(node,y):
+            
+            nonlocal ysdic
+            ysdic[node] = y
+            for kid in node.children:
+                getys(kid,y+1)
+        getys(root,0)
+        #print(ysdic.items())
+        
+        #######################
+        
+        #get xors of subtrees 
+        
+        xors = {}
+        childdic = collections.defaultdict(set)
+        def getxors(node):
+            nonlocal xors
+            nonlocal childdic
+            cur = node.val
+            childdic[node].add(node)
+            for child in node.children:
+                
+                childxor, childset = getxors(child)
+                cur ^= childxor
+                childdic[node] |= childset
+                
+            xors[node] = cur
+            curxor = cur
+            return cur, childdic[node]
+        getxors(root)
+        ############################
+        #need to map each number to its node
+        #3 for each pair, figure out children in each pair
+        best = float('inf')
+        for i in range(nedges):
+            for j in range(i+1,nedges):
+                
+                e1 = edges[i]
+                e2 = edges[j]
+                a1,b1 = e1
+                a2,b2 = e2
+                a1 = numsToNode[a1]
+                a2 = numsToNode[a2]
+                b1 = numsToNode[b1]
+                b2 = numsToNode[b2]
+                child1 = None
+                child2 = None
+                if a1.parent == b1:
+                    child1 = a1
+                else:
+                    child1 = b1
+                if a2.parent == b2:
+                    child2 = a2
+                else:
+                    child2 = b2
+                #have two children
+                
+                
+                ######find LCA out of two children
+                
+                
+                def findlca(a,b):
+                    nonlocal ysdic
+                    nonlocal childdic
+                    #case 1 will be where each is now root of its own complete subtree (not within eachothers treees)
+                    #case 2 will be where one is part of another's tree, want to return which isi the baby of the other
+                    if a in childdic[b]:
+                        return 2,a
+                    elif b in childdic[a]:
+                        return 2,b
+                    else:
+                        return 1,None
+                    ay = ysdic[a]
+                    by = ysdic[b]
+                    #print(a.val,ay, 'b',b.val,by)
+                    lower = None
+                    higher = None
+                    if ay < by:
+                        lower = b
+                        higher = a
+                    elif ay > by:
+                        lower = a
+                        higher = b
+                    else:
+                        return 1,None
+                    cur = copy.deepcopy(lower)
+                    for i in range(ysdic[lower]-ysdic[higher]):
+                        cur = cur.parent
+                    #print(lower.label,higher.label,cur.label)
+                    if cur.label == higher.label:
+                        return 2,lower
+                    else:
+                        return 1,None
+               # print(e1,child1.val, e2, child2.val)
+                case,baby = findlca(child1,child2)
+                #print(child1.val,child2.val,case,baby,e1,e2)
+                curxors = []
+                if case == 1:
+                    #distinct xors
+                    
+                    #get ogroots xor
+                    
+                    ogrootxor = xors[root]
+                    ogrootxor ^= xors[child1]
+                    ogrootxor ^= xors[child2]
+                    curxors.append(ogrootxor)
+                    curxors.append(xors[child1])
+                    curxors.append(xors[child2])
+                else:
+                    ogrootxor = xors[root]
+                    daddy = None
+                    if baby == child1:
+                        daddy = child2
+                    else:
+                        daddy = child1
+                    ogrootxor ^= xors[daddy]
+                    curxors.append(ogrootxor)
+                    daddyxor = xors[daddy]
+                    daddyxor ^= xors[baby]
+                    curxors.append(daddyxor)
+                    curxors.append(xors[baby])
+                best = min(best,max(curxors)-min(curxors))
+        return best
+        #ok now that we have the xors
+        #maybe we don't have to go through every pair of edges
+        #if we can figure out all possible xors 
+        #for all cases where two children not in each others trees
+        #no but getting the xors is O1
+        #but you need to know the cases and the children
+        #
+        #maybe in ON you can figure out all the xors obtained by ogroot and another node that begins its own subtree
+        
+        #thats for all the case2s
+        #then for each node you could also compile a list of the xors of itself and all of its descendants trees
+        #and for every node that isn't the root, go through and figure out bests for all case 2s
+        
+        
+        #what about case 1s
+        #then after doing just ogroot and each node, you can store the min and max from that paring 
+        #and for any other node for case 2s for example, you'd get its complete subtree xor
+        #compare that against the global mins or maxes?
+        #idk
+                    
+                    
+                
+                
+        #ok so the part you can improve on maybe is the checking of whicih casae it is
+        #for each node, as you build the xors from bottom up, also build child sets for each node
+        
+                        
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+        
+        
+        #4 for each pair of children, figure out lca
+            
+            
+            
+        
+        
+        
+        
+        
+                
+                
+                
+                
+                
+            
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+                    
+                    
+                
+                
+                
+                
+                
+                
+                
