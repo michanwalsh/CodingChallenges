@@ -1,0 +1,337 @@
+class Solution:
+    def minimumIncompatibility(self, nums: List[int], k: int) -> int:
+        #nums.sort()
+        #track dups by freq
+        #use a max heap
+        #should I assign max freq dup to next max freq dup? Or to closest dup#
+        #what if there's equal dist on left and right?
+        #there should always be 
+        #what if n=9,k=3
+        #
+        #maybe define a group by its max and min elements, cause that's the incomp anyway
+        
+        #like buckets
+        #if you assign a group a max and a min, it must be able to have k-2 elements left it can put inside that bucket within that range
+        #no dups
+        #how to break into smaller problems
+        #an incompatibility sum so far, and a nums with fewer nums left over
+        #
+        #nums is at most 16
+        #nums[i] <= nums.length
+        #try duplicaates first but try all options for that dup
+        #can pass through an array of nums used and not used so far,
+        #and sum
+        #but there's too many combinations of that to memoize
+        #
+        
+        #it's undesirable to have leftmost and rightmost elements in same group or something similar
+        #so want to group those first so they aren't left out
+        #maybe get an arb or starter grouping first
+        #then manipulate until its optimal
+        #maybe there's a way to change elements to other groups that lowers score
+        #maybe my moving bottoms and tops to other groups thereby reducing inc for a group
+        #for a group, take the bottom for ex, and look for a better bottom (closer to the top)
+        #you'd have to get rid of the current bottom. So, look for a group where you'd exchange this bottom for a higher bottom . Ideally, the higher bottom might be the top of another group, so the other group gets a lower top, which is a win win
+        #but even if not, as long as it's not another bottom (1,3,26), WOULDN'T want to make it 23, 16, it's the same. would want 1,2 3,6
+        #as long as it's not another bottom, if the exchange is valid (no dups) then it would improve overall score
+        #can quickly check groups all numbers to see if dup
+        #maybe you can then call on the improved ordering
+        #or for a called ordering, you can try all valid swaps and call on new order after each of them
+        #not sure if each ordering would eventually lead to the best ordering
+        #maybe it would
+        #so pass the order as an array where groups are from left to right
+        #must be valid when you pass it
+        #and each group should be sorted
+        #don't call a prev called ordering
+        #but that shouldn't happen if you only call cheaper orderings, you'd never go in reverse
+        
+        
+        
+        
+        #so get first ordering to call
+        #then write function
+        
+        #to get first ordering
+        #sort
+        #then any time there's a dup in same group, move that dup to a group to the right
+        #if no more groups to the right, move it to a group to the front
+        #moving needs to be swapping
+        #if length max 16, max subset size is 8 (16 is trivial)
+        #so if see a dup in a group, skip to the next group, then iter until there's an element not in that orig group (doesn't matter if dup in new group you're swapping with, will fix that group eventually)
+        #then swap
+        #
+        
+#         def makeordervalid(array):
+#             groupsize = len(array)//k
+#             array.sort()
+#             for groupnum in range(k):
+#                 groupstart = groupsize*groupnum
+#                 groupmask = 0
+#                 for j in range(groupsize):
+#                     ind = groupstart + j
+#                     if groupmask ^ 1 << array[ind]:
+#                         #it is not present
+#                         #add to mask, continue
+#                         groupmask ^= 1 << array[ind]
+#                         continue
+#                     else:
+#                         indtoswap = findandswap(ind,groupmask,groupnum)
+                        
+#             def findandswap(oldind, oldmask, groupnum):
+#                 nonlocal groupsize
+#                 newstart = (groupsize*(groupnum+1))%len(nums)
+#                 #try all groups except original group
+                
+#                 for j in range(newstart-oldind):
+#                     indj = (newstart + indj)%len(nums)
+#                     if oldmask ^ 1 << array[indj]:
+#                         #not present, swap with this
+#                         return indj
+#                     else:
+                        
+            #maybe there's an easier way to get any good ordering
+            #take all dups
+            #put them in different groups
+            #while filling most empty groups first
+            #yeah that works
+            #for every number, first take a heap with filledsofar sizes of all groups
+            #pop nec number of groups (emptiest first) and put in a toadd, add to group, add back to heap later
+            #will be valid after you're done
+            
+            #how to add to a group?
+            #2d array
+            #can sort groups after 
+            c = collections.Counter(nums)
+            freqs = []
+            for key,val in c.items():
+                freqs.append((-val,key))
+                
+            groups = [[] for i in range(len(nums)//k)]
+            groupsheap = []
+            #groups heap will be (size of group so far, tuple containing elements in that group)
+            import heapq
+            for groupnum in range(k):
+                groupsheap.append((0,()))
+            
+            
+            
+            for val,key in freqs:
+                val *=-1
+                toaddback = []
+                if val > k:
+                    return -1
+                while val:
+                    x = heapq.heappop(groupsheap)
+                    size, elems = x
+                    elems = list(elems)
+                    elems.append(key)
+                    size += 1
+                    toaddback.append((size,tuple(elems)))
+                    val -=1
+                for x in toaddback:
+                    heapq.heappush(groupsheap, x)
+            groupsset = []
+            for size, elems in groupsheap:
+                elems = list(elems)
+                elems.sort()
+                groupsset.append(elems)
+            #now we have a valid but non optimizde grouping
+            def getscore(grouplist):
+                score = 0
+                for group in grouplist:
+                    group = list(group)
+                    group.sort()
+                    score += group[-1]-group[0]
+                return score
+            best = float('inf')
+            besttup = None
+            memo = {}
+            #memoize as sets, because order doesn't matter
+            count = 0
+            def improve(grouplist):
+                nonlocal count
+                if count >10000:
+                    return
+                count += 1
+                nonlocal memo
+                tup = tuple([tuple(group) for group in grouplist])
+                if tup in memo:
+                   # print('ok')
+                    return
+                
+                
+                
+                memo[tup] = True
+                
+                nonlocal best
+                score = getscore(grouplist)
+                print(grouplist,score)
+                if score < best:
+                    best = score
+                    besttup = tup
+                #try to improve using the bottom from each group
+                #can swap with anything except the bottom from any another group
+                stop = False
+                for i,g in enumerate(grouplist):
+                    if stop:
+                        break
+                    #try bottom of each group
+                    bottom = g[0]
+                    gscore = g[-1]-g[0]
+                    for j,g2 in enumerate(grouplist):
+                        if stop:
+                            break
+                        g2score = g2[-1]-g2[0]
+                        if j == i:
+                            continue
+                        for k,d in enumerate(g2):
+                            if stop:
+                                break
+                            if k==0:
+                                continue
+                            if d > bottom:
+                                if d < g[-1]:
+                                    if d not in g:
+                                        if bottom not in g2:
+                                            #see if swap would improve score
+                                            newg = copy.deepcopy(g)
+                                            newg2 = copy.deepcopy(g2)
+                                            newg[0],newg2[k] = d,bottom
+                                            newg.sort()
+                                            newg2.sort()
+                                            newgscore = newg[-1]-newg[0]
+                                            newg2score = newg2[-1]-newg2[0]
+                                            if newgscore + newg2score < gscore + g2score:
+                                                newgrouplist = copy.deepcopy(grouplist)
+                                                newgrouplist[i] = newg
+                                                newgrouplist[j] = newg2
+                                                newgrouplist.sort()
+                                                
+                                                improve(newgrouplist)
+                                                #stop = True
+                                                
+                ###end of bottom
+                ##try top
+                for i,g in enumerate(grouplist):
+                    if stop:
+                        break
+                    #try bottom of each group
+                    top = g[-1]
+                    gscore = g[-1]-g[0]
+                    for j,g2 in enumerate(grouplist):
+                        if stop:
+                            break
+                        g2score = g2[-1]-g2[0]
+                        if j == i:
+                            continue
+                        for k,d in enumerate(g2):
+                            if stop:
+                                break
+                            if k==len(g2)- 1:
+                                continue
+                            if d < top:
+                                if d > g[0]:
+                                    if d not in g:
+                                        if top not in g2:
+                                            #see if swap would improve score
+                                            newg = copy.deepcopy(g)
+                                            newg2 = copy.deepcopy(g2)
+                                            newg[-1],newg2[k] = d,top
+                                            newg.sort()
+                                            newg2.sort()
+                                            newgscore = newg[-1]-newg[0]
+                                            newg2score = newg2[-1]-newg2[0]
+                                            if newgscore + newg2score < gscore + g2score:
+                                                newgrouplist = copy.deepcopy(grouplist)
+                                                newgrouplist[i] = newg
+                                                newgrouplist[j] = newg2
+                                                improve(newgrouplist)
+                                                #stop = True
+                ####end of top
+                return 
+            ####
+            groupsset.sort()
+            improve(groupsset)
+            print(besttup)
+            return best
+            #don't just try bottoms try tops too                      
+                                                
+                
+                                                
+                                                
+                                                
+                
+                
+                
+                    
+                
+                
+            
+            
+            
+            
+                        
+                    
+        
+        #
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        #doesn't matter what size subsets as long as there's k of them and they're equal size
+        #max n//k
+        #min 1
+        #use a and or mask to make sure no equal in same subset
+        #if size 1, incom is 0
+        #that seems like a trivial answer
+        #misunderstanding problem?
+        #oh wait, order of subsets doesn't matter
+        #so it has to be n//k size
+        
+        #can't have dupp elements
+        #if any element has more than len of subset freq, -1 is answer
+        
+        #sort elements first?
+        #nums.sort()
+        #how to smartly try all possibilities
+        #could assign to highest freq numbers first
+        #if there were no duplicates, what would answer be?
+        #probably just left to right groupings
+        #but if there's dups
+        #can't nec do left to right
+        #take example 2
+        #12,12 but then 33 has a problem, so do 36 and 38, that's not optimal
+        #so maybe try all the dupliactes first instead of left to right
+        #2 first, 21 and 23 is best for 
+        #for or wait 1 is dup
+        #so 12
+        #but dup not left to right, but by freq
+        #after assigning a 1, it's no longer highest freq dup
+        #3 is
+        #so assign 3
+        #3,2
+        #now 2 is done
+        #1,3,6,8 left
+        #go left to right
+        #
+        #is that really the best answer? maybe
+        #try it
+        
+        #
+        
+        
+        
+        
+        
+        
+        
