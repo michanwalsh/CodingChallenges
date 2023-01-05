@@ -1,0 +1,235 @@
+class Solution:
+    def findRedundantDirectedConnection(self, edges: List[List[int]]) -> List[int]:
+        #potential root must have at most 1 incoming edge (if it has one, you'd have to remove that incoming edge)
+        #if you were to try removing every edge and see if it resulted in a tree, how would you try every edge
+        #or, how would you check for tree validity using all but that edge
+        
+        #without knowing which node would be the root
+        #you could start with all the nodes that would be leafs (no outgoing edges)
+        #and work your way from leaf to root
+        #there should be a direct path from leaf to root, and they should all end at the same root
+        #and you could try the edges from right to left in list of edges so when you come upon one trhat works you can return that
+        
+        #if they don't all end at same root then it doesn't work
+        #is that the only necessary condition??
+        #no, also all nodes should be reached in a validity check
+        #like if there was a cycle with no nodes without outgoing edges, you would never reach these nodes if the cycle was an island
+        
+        #and also, if you did reach these nodes from some other leaf node, then you would get stuck in this cycle and never reaceh a root for that path
+        
+        #so you'd want to keep track of the specific path you're on (leaf to root) and if you revisit a node already seen in that path, you're in a cycle, so return false for that edge
+        #path can be a bitmask
+        #also can keep a seen bitmask for the entire edge validity check to make sure you visited all the nodes 
+        
+        #this should be enough
+        #and how to traverse path from leaf to root?
+        #each leaf node should have one and only one incoming edge
+        #if it has more than one incomoing edge, (besides the removed edge) return false
+        #if it has zero, return false
+        #if any node has three or more incoming edges, there is no answer
+        
+        
+        #jut keep an adj list of nodes : incoming nodes
+        #
+        
+        #ok, write out plan
+        
+        #1. make adj list of nodes to incoming edges nodes to that node
+        #2. make a list of nodes to outgoing edges
+        #3. search for validity from right to left in edges to remove
+        #4. for an edge to remove, init a global nodes seen set or mask or count
+        #5. assemble all your leafs to search, by going through your outgoing adj, seeing if the list == 0, or if it ==1, seeing if that outgoing is the removed edge
+        #init a root variable as -1
+        #6. search from each leaf, pass along a nodes already seen mask or something
+        #7. end the search from that leaf either when 
+        #a. you revisit a node seen in that path (cycle)
+        #b. you get to a root node with no parent node (if it is different from est root node, can stop that validity search cause it won't work)
+        #8. once all the leafs have been searched from if you made it that far with the same root node being found each time, make sure every node has been visited 
+         #9. if so, you found your answer
+            
+            
+            
+        #10 getting TLE.
+        #Maybe if initially there is any node with more than 2 incoming edges, 
+        #wait, before the extra edge was added, it started as a rooted tree
+        #so there is AN answer
+        #since it was a rooted tree, when it was a rooted tree, eaech node except the root had exctly one parent
+        #after adding the edge, either a parent was added to the root (all nodes have exactly one parent now)
+        #or a parent was added to some other node(root still has no parent, but one node now has two parents)
+        
+        #if root was given a parent though, that doesn't nec mean that the rightmost edge to remove to make rooted is the one that was added. Could be some other one
+        #but if the root still has no parent and some other node has two parents,
+        #then that root sstill must be the root
+        #and the one that had an extra parent added, you have to remove one of its parents now for the tree to be rooted again
+        
+        #so if it's the second case, you can immediately know that you only have to try removing two edges (the two parent edges to the same node)
+        #but if it's the first case, maybe you still have to try all edges
+        
+        
+        #but if it's the first case, then whichever edge you try to remove, since all had one parent, now one will not have any parent, and that has to be the root, so you can immediately set that as the root prior to searching other leaves
+        #so we need some way to check which case it is prior to doing any edge checking, then that will determine how we set up our funciton
+        
+        
+        
+        isseccase = False
+        #10a
+        #do make your list of parents and children
+        #if any node has two parents, it is second case
+        #else, it is first case
+            
+            
+        #1. adj list of parent nodes
+        secondcaseparents = []
+        parents = collections.defaultdict(list)
+        for a,b in edges:
+            parents[b].append(a)
+            if len(parents[b])==2:
+                isseccase = True
+                secondcaseparents.append([parents[b][0],b])
+                secondcaseparents.append([parents[b][1],b])
+            
+                
+        #2.
+        children = collections.defaultdict(list)
+        for a,b in edges:
+            children[a].append(b)
+        #3. 
+        
+        found = False
+        n = len(edges)
+        
+        
+        for i in range(n-1,-1,-1):
+            
+           
+            
+            edge = edges[i]
+            a,b = edge
+            root = -1
+            if isseccase:
+                if edge not in secondcaseparents:
+                    continue
+            else:
+                #first ccase, know root
+                #root is child of edge you're removing which now has no parent
+                root = b
+                
+                
+                
+                
+            
+            #4
+            seenmask = 0
+            expmask = 2**n - 1
+            
+            
+            wontwork = False
+            #5. assemble leafs to search
+            leafs = []
+            #print(children.items())
+            for node in range(1,n+1):
+                if node not in children:
+                    leafs.append(node)
+                    continue
+                p = node
+                kids = children[node]
+                
+                if not kids:
+                    leafs.append(p)
+                    continue
+                elif len(kids)==1:
+                    if (p,kids[0]) == (a,b):
+                        leafs.append(p)
+                        continue
+            def dfs(pathmask, curchild):
+                nonlocal root
+               
+                nonlocal seenmask
+                nonlocal parents
+                nonlocal wontwork
+                nonlocal edge
+                a,b = edge
+                
+                #print(pathmask,curchild,wontwork)
+                if wontwork:
+                    return
+                #add the curchild to pathmask. if it is already there, stop this search
+                if pathmask & 1 << curchild:
+                    #already there, this edge won't work
+                    wontwork = True
+                    return
+                else:
+                    pathmask ^= 1 << curchild
+                
+                #OR the seenmask
+                seenmask |= 1 << curchild
+                
+                #get the parent for this node
+                curparents = parents[curchild]
+                isroot = False
+                if not curparents:
+                    isroot = True
+                    
+                elif len(curparents)==1:
+                    if [curparents[0],curchild] == [a,b]:
+                        isroot = True
+                    else:
+                        dfs(pathmask,curparents[0])
+                elif len(curparents) > 2:
+                    wontwork = True
+                    return
+                elif len(curparents)==2:
+                    if [curparents[0],curchild] == [a,b]:
+                        #second parent is parent, ignore first parent
+                        dfs(pathmask,curparents[1])
+                    elif [curparents[1],curchild] == [a,b]:
+                        dfs(pathmask,curparents[0])
+                        #first parent is parent, ignore second parent
+                    else:
+                        #too many parents, won't work
+                        wontwork = True
+                        return
+                
+                if isroot:
+                    #root, check with cur root
+                    if root == -1:
+                        root = curchild
+                        return
+                    else:
+                        if root != curchild:
+                            wontwork = True
+                            return
+                        else: #same root
+                            return
+            ####end of dfs
+        
+            
+            #6 search from each leaf
+            
+            
+            for leaf in leafs:
+                if wontwork:
+                    #print('ok')
+                    break
+                
+                dfs(0,leaf)
+            ####
+            #if searched each leaf and not wontwork (still ok), check tha tall nodes have been visited 
+            if wontwork:
+                continue
+            #print(seenmask,expmask)
+            if seenmask == expmask*2:
+                return [a,b]
+            
+            
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
