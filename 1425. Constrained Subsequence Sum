@@ -1,0 +1,28 @@
+class Solution:
+    def constrainedSubsetSum(self, nums: List[int], k: int) -> int:
+        heap = []
+        import heapq
+        best = float('-inf')
+        for i in range(len(nums)-1,-1,-1):
+            cur = nums[i]
+            #print(i,cur,heap)
+            while heap and heap[0][1] - i > k:
+                heapq.heappop(heap)
+            if heap:
+                top = heap[0][0]
+                
+                toadd = -cur + top
+              #  print(toadd,-cur)
+                if toadd <-cur:
+                    heapq.heappush(heap, (toadd,i))
+                    best = max(best,-toadd)
+                else:
+                    heapq.heappush(heap,(-cur,i))
+                    best = max(best,cur)
+            else:
+                heapq.heappush(heap,(-cur,i))
+                best = max(best,cur)
+                
+        best = max(best, max([i for i in nums]))
+        return best
+            
