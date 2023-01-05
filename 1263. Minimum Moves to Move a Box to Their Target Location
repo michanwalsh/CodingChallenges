@@ -1,0 +1,128 @@
+class Solution:
+    def minPushBox(self, grid: List[List[str]]) -> int:
+        #queue states will have box pos, person pos, steps so far
+        #keep a seen with state box pos and person pos to avoid repeating
+        #for possible new box positions, use a dfs keeping track of box pos to make sure person can get to necessary pushing
+        #position
+        #if it can, add the new box state to q
+        #bfs means if you reach target return steps
+        #
+        from collections import deque
+        q = deque()
+        
+        #find person first, find box, find target, set as variables
+        m,n = len(grid), len(grid[0])
+        
+        pers, box, target = None,None,None
+        for i in range(m):
+            for j in range(n):
+                let = grid[i][j]
+                if let == 'T':
+                    target = (i,j)
+                if let == 'S':
+                    pers = (i,j)
+                if let == 'B':
+                    box = (i,j)
+        #state is box,person,steps
+        q.append((box, pers, 0))
+        
+        def getpos(box):
+            bi,bj = box
+            ans = [0,0]
+            def free(i,j):
+                if 0<=i<m and 0<=j<n and grid[i][j] != '#':
+                    return True
+            if free(bi+1,bj) and free(bi-1,bj):
+                ans[0] = 1
+            if free(bi,bj+1) and free(bi,bj-1):
+                ans[1] = 1
+            return ans
+                
+        
+        def canpush(box,pers,targetpush):
+            seen = {}
+            good = 0
+            def dfs(i,j):
+                nonlocal good
+                dirs = [(0,1),(1,0),(-1,0),(0,-1)]
+                if good:
+                    return
+                if (i,j)==targetpush:
+                    good = 1
+                    return
+                seen[(i,j)]=1
+                for rr,cc in dirs:
+                    nr,nc = i+rr,j+cc
+                    if 0<=nr<m and 0<= nc<n and (nr,nc)!=box and (nr,nc) not in seen:
+                        if grid[nr][nc] =='#':
+                            continue
+                        
+                        dfs(nr,nc)
+            i,j = pers
+            dfs(i,j)
+            return good==1
+            
+            
+        memo = {}
+        while q:
+            print(q[0])
+            cbox,cpers,steps = q.popleft()
+           
+            if cbox == target:
+                return steps
+            memo[(cbox,cpers)]=1
+            canup,canleft = getpos(cbox)
+           
+            if canup:
+                if canpush(cbox,cpers,(cbox[0]-1, cbox[1])):
+                    #can position on top to push below
+                    newbox = (cbox[0]+1, cbox[1])
+                    newpers = cbox
+                    if (newbox,newpers) not in memo:
+                        q.append((newbox,newpers,steps +1))
+                        memo[(newbox,newpers)]=1
+                if canpush(cbox,cpers,(cbox[0]+1, cbox[1])):
+                    #can position below to push up
+                    newbox = (cbox[0]-1, cbox[1])
+                    newpers = cbox
+                    if (newbox,newpers) not in memo:
+                        q.append((newbox,newpers,steps +1))
+                        memo[(newbox,newpers)]=1
+                
+            if canleft:
+                if canpush(cbox,cpers,(cbox[0], cbox[1]-1)):
+                   
+                    #can position on left to push right
+                    newbox = (cbox[0], cbox[1]+1)
+                    newpers = cbox
+                    if (newbox,newpers) not in memo:
+                        q.append((newbox,newpers,steps +1)) 
+                        memo[(newbox,newpers)]=1
+                if canpush(cbox,cpers,(cbox[0], cbox[1]+1)):
+                 
+                    #can position on right to push left
+                    newbox = (cbox[0], cbox[1]-1)
+                    newpers = cbox
+                    if (newbox,newpers) not in memo:
+                        q.append((newbox,newpers,steps +1))
+                        memo[(newbox,newpers)]=1
+        return -1
+                        
+            
+                        
+                
+                        
+                        
+                        
+                        
+                        
+                        
+                    
+            
+            
+            
+            
+            
+            
+            
+                
