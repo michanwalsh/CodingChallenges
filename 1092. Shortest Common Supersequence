@@ -1,0 +1,58 @@
+class Solution:
+    def shortestCommonSupersequence(self, str1: str, str2: str) -> str:
+        #
+        al = len(str1)
+        ab = len(str2)
+        
+        def lcs(a,b):
+            al = len(a)
+            ab = len(b)
+            dp = [['' for i in range(ab+1)] for i in range(al + 1)]
+            
+            for ii in range(al):
+                for jj in range(ab):
+                    i = ii+1
+                    j = jj+1
+                    cura = a[ii]
+                    curb = b[jj]
+                    if cura == curb:
+                        dp[i][j] = dp[i-1][j-1] + cura
+                        continue
+                    dp[i][j] = max((dp[i-1][j], dp[i][j-1], dp[i][j]), key=len)
+            return dp[-1][-1]
+        x = lcs(str1, str2)
+        a = str1
+        bf = [False for i in str2]
+        j = 0
+        nx = len(x)
+        for i in range(ab):
+            if j == nx:
+                break
+                
+            if str2[i] == x[j]:
+                bf[i] = True
+                j += 1
+                continue
+        print(bf)
+        ans = [i for i in a]
+        ia = 0
+        need = bf
+        j = 0
+        while j < len(need):
+            if not need[j]:
+                ans.insert(ia, str2[j])
+                j += 1
+                ia += 1
+                continue
+            else:
+                while ans[ia] != str2[j]:
+                    ia += 1
+                ia += 1
+                j +=1
+                continue
+                    
+        return ''.join(ans)
+            
+            
+        
+        
