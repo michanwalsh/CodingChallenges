@@ -1,0 +1,59 @@
+class Solution:
+    def maxValue(self, events: List[List[int]], k: int) -> int:
+        #sort by start
+        #want a list of max sums you can get from events up to a certain end day
+        #and if a max for an end is  bigger than a max for any bigger end, update those ends to be the new max
+        
+        #then for a start, search the list for the biggest end less than the start
+        #then update the cur event's end if that max + this event's value is better
+        
+        
+        #but wait take into account the k
+        #need to make the dp two dimensional also for all ks
+        
+        #and also if we have a better sum for a smaller k than for >=k and >= end, we'll update
+        #or should we use k heaps
+        #lazy remove on a kth max heap until you get an end smaller than the current start
+        #all while keeping track of all elements whose end was >= start but <= end, cause those might be better than the heappop + cur
+        
+        #then you'll know best value for including this element (k+1), can push it and its end into the k+1th heap
+        
+        #then at the end you'll take themax of all top elements of all heaps
+        heaps = [[] for i in range(k+1)]
+        print(heaps[k])
+        events.sort()
+        import heapq
+        
+        N = len(events)
+        
+        for i in range(N):
+            
+            start,end,value = events[i]
+            for j in range(k):
+                curheap = heaps[j]
+                curval =0
+                toaddback = []
+                if start>1:
+                    while curheap and curheap[0][1] >= start:
+                        #print(curheap[0][1],start)
+                        toaddback.append(heapq.heappop(curheap))
+                #print(curheap,start)
+                if curheap and curheap[0][1]<start:
+                    curval,curend = curheap[0]
+                    
+                
+                incval = curval - value
+                #print(incval)
+                heapq.heappush(heaps[j+1],[incval,end])
+                for toadd in toaddback:
+                    heapq.heappush(curheap,toadd)
+       # print(heaps)
+        ans = 0
+        for heap in heaps:
+            if heap:
+                ans= max(ans,-heap[0][0])
+        return ans
+                    
+                    
+                    
+                
