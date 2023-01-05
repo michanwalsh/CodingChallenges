@@ -1,0 +1,44 @@
+class Solution:
+
+    def __init__(self, n: int, blacklist: List[int]):
+        self.n = n
+        if n > 10**7:
+            
+            self.blacklist = set(blacklist)
+            self.n = n
+            return 
+        self.nums = [i for i in range(n)]
+        r = n-1
+        l = 0
+        #how many numbers in blacklist
+        #should be two sides, left is good numbers right is blacklist numbers
+        blacklist.sort()
+        N = len(blacklist)
+        part = n-N#4
+        print(part)
+        newblacklist = set(blacklist)
+        for num in blacklist:
+            if num >= part:
+                break
+            while r in newblacklist: 
+                r-=1
+            self.nums[num],self.nums[r] = self.nums[r],self.nums[num]
+            r -= 1
+        print(self.nums)
+            
+        self.nums = self.nums[:part]
+    def pick(self) -> int:
+        if self.n >10**7:
+            x = random.randint(0,self.n)
+            while x in self.blacklist:
+                x = random.randint(0,self.n)
+                
+            return x
+        
+        return choice(self.nums)
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(n, blacklist)
+# param_1 = obj.pick()
+
+    #
