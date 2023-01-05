@@ -1,0 +1,133 @@
+class Solution:
+    def longestAwesome(self, s: str) -> int:
+        
+        #mask with even number of all elements, may have on element with an odd number
+        
+        #n**2 substrings
+        lastocc = {}
+        for i,d in enumerate(s):
+            lastocc[d] = i
+        N  = len(s)
+        best = 1
+        
+        premasks = [0]
+        mask =0
+        odds = 0
+        
+        occs = collecions.defaultdict(list)
+        
+        for i,d in enumerate(s):
+            s[int(d)].append(i)
+        
+        
+        for j in range(N):
+            cur = int(s[j])
+            mask ^= 1<<cur
+            premasks.append(mask)
+            if mask & 1 << cur:
+                odds += 1
+            else:
+                odds -= 1
+            #print(j,odds)
+        
+        
+        for i in range(N):
+            j = N-1
+            odds = 0
+            oddset = set()
+            # if N-i < best:
+            #     return best
+            maski = premasks[i]
+            maskj = premasks[j+1]
+            
+            mask = 0
+            
+            if N-i < best:
+                break
+            
+            for kk in range(10):
+                if maski & 1<<kk:
+                    if not maskj & 1<<kk:
+                        odds += 1
+                        oddset.add(kk)
+                        
+                        
+                        mask ^= 1 <<kk
+                elif not maski & 1 << kk:
+                    if maskj & 1 << kk:
+                        odds += 1
+                        mask ^= 1  <<kk
+                        
+                
+            #print(i,j,mask,odds,best)
+            
+            if odds <=1 :
+                best = max(best,N-i)
+                
+                continue
+            j = N
+            while odds > 1 and j >= i:
+                
+                for odd in oddset:
+                    x = bisect.bisect_left(occs[odd],j)
+                    #x must be greater or equal to i
+                    
+            
+            
+            
+            
+            for j in range(N-1,i,-1):
+                cur = int(s[j])
+                mask ^= 1 << cur
+                
+                
+                
+                if mask & 1<<cur:
+                    odds +=1
+                else:
+                    odds -= 1
+                
+                #print(i,j,mask,odds)
+                
+                if odds <= 1:
+                    best = max(best,j-i)
+                    break
+                
+            
+                    
+        return best
+                
+        
+        #for all the odds at first j, check to make sure the last occ of that odd isn't before i. If it is, and there are >=2 such odds of that condition, can break and continue the i 
+        #well wait, it wouldn't be odd in that case
+        #if ther are more than 2 odds, maybe we can jump somewhere
+        #maybe pick all of the odds, bisect its list of occurences, then jump to its next occurence in between i and j 
+        #
+        
+        
+        #instead what if we  precompute our masks in a presums way
+        #then for each i, start at j at the end, and only shrink until you get a working substring
+        
+        premasks = [0]
+        mask =0
+        odds = 0
+        if N-i < best:
+            return best
+        for j in range(i,N):
+            cur = int(s[j])
+            mask ^= 1<<cur
+            premasks.append(mask)
+            
+        
+        
+        
+        
+        
+            
+
+        
+        
+        
+        
+        
+        
