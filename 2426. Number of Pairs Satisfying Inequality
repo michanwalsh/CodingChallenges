@@ -1,0 +1,37 @@
+class Solution:
+    def numberOfPairs(self, nums1: List[int], nums2: List[int], diff: int) -> int:
+        #obv cant just be n**2
+        #sort probably helps
+        
+        #for each number i, in nuums2, 
+        
+        #let's say you have a j. yuo know the nums1 j and num2s j 
+        #rearrange equation to be nums2j-nums1j-diff < nums2i-nums1i 
+        #so you know your left side now. 
+        #so you want a right side that is bigger than left side
+        #you can put all your nums2i-nums1i in an n sized array
+        
+        #but the is have to be before the j so you can't just sort it
+        
+        #well you can, but you'd have to sort and check that they're all to the left
+        #or if you construct these as you go left to right, insorting the new pair
+        
+        #then by seeing how many already insorted have a greater value than your left side, you can add that number
+        
+        #then add the left side, but as a right side, by insorting
+        #overall, nlogn?
+        a,b = nums1,nums2
+        #nums2j-nums1j-diff <= nums2i-nums1i 
+        
+        arr = []
+        en = len(nums1)
+        ans = 0
+        for i in range(en):
+            leftside = b[i]-a[i]-diff
+            rightside = b[i]-a[i]
+            x = bisect.bisect_left(arr,leftside)
+            ans += len(arr)-x
+            bisect.insort(arr,rightside)
+            
+        return ans
+            
