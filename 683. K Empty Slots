@@ -1,0 +1,28 @@
+class Solution:
+    def kEmptySlots(self, bulbs: List[int], k: int) -> int:
+        #make an array that contains the day a bulb was turned on.
+        # then use a sliding window to check all bulbs k distance apart who don't have bulbs in between that have a equal or lower day number than them. 
+        dp = [None for _ in range(len(bulbs))]
+        i = 0
+        for i in range(len(bulbs)):
+            day = i
+            x = bulbs[i]
+            dp[x-1] = i
+        print(dp)
+        n = len(bulbs)
+        start = []
+        ans = float("inf")
+        for i in range(n-k-1):
+            start = i
+            end = i + k + 1
+            good = True
+            for j in range(start + 1, end):
+                if dp[j] <= dp[start] or dp[j] <= dp[end]:
+                    good = False
+                    break
+            if good == True:
+                day = max(dp[start], dp[end])
+                ans = min(ans, day)
+        if ans == float("inf"):
+            return -1
+        return ans + 1
