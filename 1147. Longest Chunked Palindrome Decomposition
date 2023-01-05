@@ -1,0 +1,57 @@
+class Solution:
+    def longestDecomposition(self, text: str) -> int:
+        #max is len(s)
+        #if letter matches, add 2 to rec on string within those edges
+        #else, first char will have to be found somewhere or else answer is 1
+        #check all appearances of first char
+        #see if that appearance to end is equal to start char seg of equal length
+        #if it is, ans could be 2 + rec on string within
+        #cache results for intermediate strings
+        #only need to try first character and all other occurences of it, or else answer is 1
+        #valid possible will call recursively
+        #
+        
+        ans = 1
+        
+        def rec(string,sofar):
+            
+            nonlocal ans
+            if ans==len(text):
+                return
+            if not string:
+                
+                ans = max(ans, sofar)
+                return
+            if len(string)==1:
+                ans = max(ans, sofar+1)
+                return 
+            # if string in memo:
+            #     return memo[string]
+            start = string[0]
+            occs = []
+            for i in range(1,len(string)):
+                let = string[i]
+                if let==start:
+                    occs.append(i)
+            stack = [start]
+            startstack = []
+            i = 0
+            for j in range(len(string)-1,-1,-1):
+                if j<=i:
+                    rec('', sofar+1)
+                    break
+                curlet = string[j]
+                startstack.insert(0,curlet)
+                
+                if curlet==start:
+                    
+                    if stack == startstack:
+                        
+                        rec(string[i+1:j], sofar+2)
+                
+                i += 1
+                stack.append(string[i])
+        rec(text,0)
+        return ans
+            
+        
