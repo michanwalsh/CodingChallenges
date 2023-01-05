@@ -1,0 +1,139 @@
+class Solution:
+    def isPrintable(self, targetGrid: List[List[int]]) -> bool:
+        #at most 60 colors
+        #each color has to be used exactly once
+        #but the order matters
+        
+        #brute is just try all perms of orders
+        
+        
+        #similar to stamps maybe
+        #any full rectangles may be the most recent rectangle rectangled
+        #and there would be no point in having rectangled only that  same rectangle before, so it would make sense that before that, it was either nothing or some perimeter color
+        
+        #
+        
+        #but it doesn't matter anyway what you rectangle it as cause eventully will cover it up
+        #so can replace with -1 or something
+        
+        #then look for another full rectangle, which could include -1s
+        #how to do that
+        
+        
+        #find outermost squares of a color, ie leftmost i, rightmost i, upmost j, bottomest j
+        #use those to define your rectangle, just make sure nothing besides that color and -1s is there
+        
+        #to avoid researching each time, you could probably go through in one search and definte the rectangle for each color
+        
+        #and just make a list for each color of all the squares that would need to be -1d before you can get that full color
+        
+        #then map the coords to the colors for which they are obstructing that color from being a full rectangle
+        
+        #every time you turn something -1, decrease the #of obstructors for that color by 1
+        #if it's zero, you can color it, add it to the queue
+        #initially, add all with indeg 0 to queue
+        #just make sure that all get covered before the q ends or else return false
+        
+        
+        #so first, go through and map for each color: [li,ri,uj,dj]
+        #this is in N time for the grid
+        #then, for each color, go through the bounds of each color, and list all obstr coords
+        #if 0, add color to q, add to seen
+        #then make the same map with number of obstr instead of list
+        #then map all obstr coords to colors they obstruct
+        
+        #begin popping from queue, dec indegree for each coord in FULL rectangle (that isn't already a -1)
+        #add to queue if indegree 0
+        #keep going 
+        
+        grid= targetGrid
+        from collections import deque
+        q = deque()
+        seen =set()
+        colorcount = 0
+        colorbounds = {} #[li,ri,uj,dj]
+        colorindegree = collections.defaultdict(int)
+        coordtocolors = collections.defaultdict(list)
+        
+        m,n = len(grid),len(grid[0])
+        
+        for i in range(m):
+            for j in range(n):
+                col = grid[i][j]
+                if col not in colorbounds:
+                    colorcount +=1
+                    colorbounds[col] = [i,i,j,j]
+                else:
+                    bounds = colorbounds[col]
+                    if i < bounds[0]:
+                        bounds[0]=i
+                    elif i >bounds[1]:
+                        bounds[1] = i
+                    if j < bounds[2]:
+                        bounds[2] = j
+                    elif j >bounds[3]:
+                        bounds[3] = j
+        
+        for col,bounds in colorbounds.items():
+            obstr = []
+            li,ri,uj,dj = bounds
+            for i in range(li,ri+1):
+                for j in range(uj,dj+1):
+                    if grid[i][j] != col:
+                        obstr.append((i,j))
+                        colorindegree[col] +=1
+                        coordtocolors[(i,j)].append(col)
+        
+            if not obstr:
+                q.append((col))
+                
+                
+        while q:
+            col = q.popleft()
+            
+            seen.add(col)
+            
+            bounds = colorbounds[col]
+            li,ri,uj,dj = bounds
+            for i in range(li,ri+1):
+                for j in range(uj,dj+1):
+                    if grid[i][j] != -1:
+                        obstrcolors = coordtocolors[(i,j)]
+                        for obscol in obstrcolors:
+                            colorindegree[obscol] -= 1
+                            if colorindegree[obscol] == 0:
+                                q.append(obscol)
+                        grid[i][j]  =-1
+                        
+        if len(seen)==colorcount:
+            return True
+        return False
+                                
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+                        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
