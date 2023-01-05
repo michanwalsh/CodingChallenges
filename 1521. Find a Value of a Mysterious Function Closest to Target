@@ -1,0 +1,109 @@
+class Solution:
+    def closestToTarget(self, arr: List[int], target: int) -> int:
+        #obv cant just call all n**2 pairs
+        
+        
+        #if target was 0, the more we and, the better chance we have of lowering
+        
+        #if we have an ans == target, continuing to and more numbers can only lower it
+        
+        #so for every l, try binary searching the r. If 
+        
+        #consider all the ls. for every l, continuing to rs can only lower it, not raise it
+        
+        #so first get all the ls. if target is 5 and there's a 6 l, no point starting frmo any l that is higher than 6, like 7 or 8
+        
+        #so find the closest ls to target, do every r for that
+        inds =[]
+        inds.append(0)
+        for i in range(1,len(arr)):
+            if arr[i] == arr[i-1]:
+                continue
+            else:
+                inds.append(i)
+        
+        #calling on every l,l will give you the values of the array
+        best= float('inf')
+        #print(arr)
+        vals = []
+        n = len(arr)
+        minabove = float('inf')
+        aboveind = -1
+        minbelow = float('inf')
+        belowind = -1
+        for i in range(n):
+            d = arr[i]
+            #best = min(best,abs(d-target))
+            if d==target:
+                return 0
+            if d>target:
+                if d-target < minabove:
+                    minabove = d-target
+                    aboveind = i
+            
+            if d < target:
+                if target-d < minbelow:
+                    minbelow = target-d
+                    belowind = i
+        
+        #try going from right to left
+        #you can dp something?
+        #go from rigiht to left, dp the full & from index to right side
+        #as you go left, compare witht eh one to the right of its dp, if the and of ind and dp of ind +1 is greater than or equal to best, wo't be able to get anything smaller by continuing the search from that ind. if it's lower, then worth doing the search
+        print(best,'end')
+        
+        dp = {}
+        
+        def func(l,r):
+            nonlocal best
+            ans = arr[l]
+            # if abs(ans-target) >best:
+            #     return
+            best = min(best,abs(ans-target))
+            if ans < target:
+                return
+            for j in range(l+1,r+1):
+                best = min(best,abs(ans-target))
+                if ans < target:
+                    return
+                ans = ans & arr[j]
+            best = min(best,abs(ans-target))
+        #print(func(0,2),'ok')
+        dp[n-1] = arr[n-1]
+        for i in range(n-2,-1,-1):
+            nextdp = dp[i+1]
+            ans = arr[i]
+            
+            if ans&nextdp >= target or arr[i]==arr[i+1] or target-(ans&nextdp) ==1:
+                print(i)
+                dp[i] = ans&nextdp
+                best = min(best, abs(target-(ans&nextdp)))
+                best = min(best,abs(ans-target))
+                if best==0:
+                    return best
+                continue
+            else:
+                print('searched',i,ans,nextdp,ans&nextdp,target)
+                dp[i] = ans&nextdp
+                best = min(best, abs(target-(ans&nextdp)))
+                if best==0:
+                    return best
+                func(i,n-1)
+                best = min(best,abs(ans-target))
+        #if the mask is bigger than target, no point because you can't get a smaller mask, the best you can do is with the dp mask
+        
+        #but if it is smaller than target, try it 
+            
+        #if 
+        # for i in inds:
+        #     func(i,n-1)
+        #print(aboveind,belowind)
+        if aboveind != -1:
+            
+            func(aboveind,n-1)
+        if belowind != -1:
+            func(belowind,n-1)
+       
+        return best
+        #maybe go from every l, but don't keep searching if you've already dipped below target cause it can only get lowered from there
+        
