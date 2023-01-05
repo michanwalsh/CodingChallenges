@@ -1,0 +1,23 @@
+class Solution:
+    def canConvert(self, str1: str, str2: str) -> bool:
+        dic = {}
+        a,b = str1,str2
+        for aa,bb in zip(a,b):
+            if aa in dic:
+                if bb != dic[aa]:
+                    return False
+            else:
+                dic[aa] = bb
+        print(dic)
+        s1 = set()
+        s2 = set()
+        for let in str1:
+            s1.add(let)
+        for let in str2:
+            s2.add(let)
+        if len(s2)>len(s1):
+            return False
+        elif len(s1)==26 and len(s2)==26:
+            if str1 != str2:
+                return False
+        return True
