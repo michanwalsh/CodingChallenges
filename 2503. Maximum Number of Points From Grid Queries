@@ -1,0 +1,55 @@
+class Solution:
+    def maxPoints(self, grid: List[List[int]], queries: List[int]) -> List[int]:
+        #replace numbers in the grid with min number in a path to that number including that number
+        #then just take the new grid vlues into a list and sort
+        #bisect queries into array as your answer
+        
+        minyet = {}
+        m,n = len(grid),len(grid[0])
+        count = 0
+        maxx = max(queries)
+        print(max(queries))
+        
+        
+        print(m*n)
+        
+        minyet[(0,0)] = grid[0][0]
+        import heapq
+        
+        heap = []
+        heapq.heappush(heap,(grid[0][0],0,0))
+        while heap:
+            maxyet, i,j = heapq.heappop(heap)
+            
+            dirs = [(0,1),(1,0),(0,-1),(-1,0)]
+            
+            for rr,cc in dirs:
+                nr,nc = rr+i, cc+j
+                if not (0<=nr<m and 0<=nc<n):
+                    continue
+                if (nr,nc) not in minyet:
+                    minyet[(nr,nc)] = max(minyet[(i,j)],grid[nr][nc])
+                    heapq.heappush(heap,(minyet[(nr,nc)],nr,nc))
+                elif minyet[(i,j)] < minyet[(nr,nc)]:
+                    minyet[(nr,nc)] = max(minyet[(i,j)],grid[nr][nc])
+                    heapq.heappush(heap,(minyet[(nr,nc)],nr,nc))
+        
+        
+        
+        
+        arr = []
+        for i in range(m):
+            for j in range(n):
+                arr.append(minyet[(i,j)])
+        arr.sort()
+        
+        ans = []
+        for q in queries:
+            x = bisect.bisect_left(arr,q)
+            ans.append(x)
+        return ans
+
+        
+        
+        
+        
