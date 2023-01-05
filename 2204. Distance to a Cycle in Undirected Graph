@@ -1,0 +1,132 @@
+class Solution:
+    def distanceToCycle(self, n: int, edges: List[List[int]]) -> List[int]:
+        #detect cycle
+        #find all nodes in cycle
+        #bfs from each node until reach a node in cycle
+        #or bfs from each cycle node, updating each non cycle  node with how many steps it took (minimum so far) to get there
+        
+        #how to detect cycle
+        #union find, if already part of same union there is cycle#
+        #but how to get each node in cycle
+        #critical connections in network
+        #then mark all nodes not part of at least one critical connection as nodes not in cycle
+        #every other node is in cycle
+        #how to do critical connections in network 
+        
+        #dfs from any node
+        #pass through previous node, check all neighbors except previous node
+        #pass through a level pos number that inc at each step
+        #that number is the order in which it has been reached
+        #if you get to a number that is lower than the number you're at or even the same, there's a cycle
+        #can count that recently reaeched equal or lower node as in cycle
+        #can count node just searched from in cycle
+        #can backtrack until you get back to that equal or lower marked node (will be lower cause of dfs not equal) and mark them all as in cycle, therefore not critical
+        #and only call algorithms on nodes that have not? been searched yet?
+        #
+        
+        #create adj dic
+        nodes = set()
+        
+        adj = collections.defaultdict(list)
+        for a,b in edges:
+            nodes.add(a)
+            nodes.add(b)
+            adj[a].append(b)
+            adj[b].append(a)
+        numnodes = len(nodes)
+        cycleedges = set()
+        print(adj)
+        nodeslevels = [float('inf') for a in range(numnodes)]
+        nodeslevels[0] =1 
+        def dfs(prevnode, node, level):
+            #you would never get to an already assigned higher node because that higher node would've gotten to you first in its dfs
+            #so will only get to not assigned at all or lower assigned
+            #how to check if assigned
+            #store level
+            #if get to lower, do we need to change the level of the lower one to match the higher one or vice versa? Don't think it matters, would only either get to unaassigned or lower
+            #and if we're going to get to lower (assinged), we're not going to search on it cause we already have
+            
+            #what are we going to return if we find lower node vs if we don't
+            #True (part of cycle) or False(not part of cycle)
+            #and we want to return this until we get back to the lower node that we found
+            #so we need to return that to, so we know when to stop backtracking
+            #all along the way, we need to mark the edge from node to node returned from as non critical edge
+            #so we can return part of cycle or not part of cycle
+            #or we can just make all of the nodeslevels in that backtrack cycle path be equal to that lowest node
+            #then as we backtrack we'll notice that this node we're backtracking from is less than or equal to the node we're currently searching on 
+            #in which case we can mark the edge from back to cur as non critical
+            
+            #so dfs nei with level + 1
+            #and after dfs, if level of  nei is less or equal, mark as non critical and change cur to that of nei, should process for others in backtrack
+            #at begin of func, don't dfs if cur is lower or equal to than that of prevnode
+            
+            
+            nonlocal cycleedges
+            nonlocal adj
+            nonlocal nodeslevels
+            #print(prevnode,node,level)
+            if prevnode != -1:
+                if nodeslevels[node] <= nodeslevels[prevnode]:
+                    #print('lower')
+                    #print(nodeslevels[prevnode],nodeslevels[node])
+                    nodeslevels[prevnode] = nodeslevels[node]
+                    cycleedges.add((node,prevnode))
+                 
+                    #print(prevnode,node,level,nodeslevels[prevnode]
+                          #,nodeslevels[node],'lower')
+                    return
+            nodeslevels[node] = level
+            for nei in adj[node]:
+                if nei == prevnode:
+                    continue
+                
+                dfs(node, nei, level+1)
+                #print(node,nei,'After')
+                if nodeslevels[nei] <= nodeslevels[node]:
+                    nodeslevels[node] = nodeslevels[nei]
+                    cycleedges.add((node,nei))
+        dfs(-1,0,1)
+        print(cycleedges)
+        nodesincycle = set()
+        for a,b in cycleedges:
+            nodesincycle.add(a)
+            nodesincycle.add(b)
+        #now we can search from all the nodes involved in at least once cycle
+        #and we can search to only neighbors that are not involved in a cycle
+        #and we can pass a steps, and  update and continue searching that node only if its a new minimum number of steps to get to that node
+        #which we'll keep track in an array of minimum number for each node, 0 for cycle and inf for non cycle init
+        minsteps = [float('inf') for i in range(numnodes)]
+        for node in list(nodesincycle):
+            minsteps[node] = 0
+        
+        def dfs(node,stepsto):
+            nonlocal minsteps
+            for nei in adj[node]:
+                if stepsto+1 < minsteps[nei]:
+                    minsteps[nei] = stepsto+1
+                    dfs(nei, stepsto+1)
+                    
+        for node in list(nodesincycle):
+            dfs(node, 0)
+        return minsteps
+        
+        
+        
+        
+                    
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        
+        
+        
+        
+        
+        
+        
