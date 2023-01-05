@@ -1,0 +1,40 @@
+class Solution:
+    def uniquePathsIII(self, grid: List[List[int]]) -> int:
+        #dfs from start with visited set, only visiting if not in visited, if reach the end and visited = expected, inc ans
+        
+        #
+        m,n = len(grid), len(grid[0])
+        exp = 0
+        ans = 0
+        start = None
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] ==0 or grid[i][j] == 1:
+                    exp += 1
+                if grid[i][j] == 1:
+                    start = (i,j)
+        
+        def dfs(i,j,seen):
+            nonlocal exp
+            nonlocal ans
+            
+            if grid[i][j] ==2:
+               
+                if len(seen) == exp:
+                    ans += 1
+                    return
+            dirs = [(0,1),(1,0),(-1,0),(0,-1)]
+            temp = copy.deepcopy(seen)
+            temp.add((i,j))
+            for rr,cc in dirs:
+                nr,nc = i + rr,j+cc
+                
+                if 0<=nr<m and 0<=nc<n and (nr,nc) not in seen and (grid[nr][nc] ==0 or grid[nr][nc] == 2):
+                    
+                    dfs(nr,nc,temp)
+        
+        si,sj = start
+        dfs(si,sj,set())
+        return ans
+        
+                
