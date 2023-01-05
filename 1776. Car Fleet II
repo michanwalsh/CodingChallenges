@@ -1,0 +1,154 @@
+class Solution:
+    def getCollisionTimes(self, cars: List[List[int]]) -> List[float]:
+        #initial thoughts is iterate through all seconds'#
+        #at each second track position of every car
+        #if any of them occupy the same position or have overtaken one another, they will have formed a fleet and need to replace them accordingly
+        
+        #figure out which time the next earliest forming fleet will be formed, replace, then continue from there
+        #refigure out the positions of all the cars at the time the next fleet was formed
+        #and when a car collides, mark its answer in the array
+        #cars will escape other cars if they are faster than any cars to the left of them in which case, -1
+        
+        #which is why 43 escapes 21 (21 only becomes 2 speed after first collision with 12) and 72 doesn't have cars to the right
+        #
+        
+        #let a fleet be represented by a bitmask of all the cars it contains
+        #then when it collides with another car, the last car in the fleet (or can just be represented as the most recent car cause all other would have been answered already) 
+        
+        #how to figure which is next collision that will take place
+        
+        #you could use a max stack going rigiht to see when a car will escape all cars to its left
+        
+        #how would that help find next collision though
+        #for every two adjacent cars (except ones that won't collide on next round unless fleet is formed for former car)
+        #can calculate how long before they crash
+        #like 1 + 2x = 2 + 1x solve for x x is seconds after which they'll collide
+        #do this for all adjacent, keep track of the minimum seconds
+        #that's the next collision 
+        #go to that collision, mark the answer for the former car
+        #remove those two cars, replace with the position they collide at (position of either plus speed times seconds they collide at) and a third marker which is the index of the rightmost car in the fleet (car to be marked once the next collision occurs)
+        #and go and recalculate again with your new array of cars
+        #although maybe to avoid recalculating each time
+        #you can just store in a min heap of seconds
+        
+        
+        #and as long as the collision on top of the heap doesn't involve cars you replaced, you can use them
+        
+        #honestly when a collision happens, it's basically still staying as the rightmost car, cause if it wasn't the slowest, it wouldn't have been crashed into
+        #so when a collision happens, you're just removing the car that crashes
+        
+        #so when a collision happens, you have to add one new calculation, which is the one before the crasher to the new fleet
+        #you can always just find that 01, calculate, add to min heap
+        
+        
+        #step 1
+        #create a min heap
+        #add to the heap the calculation (seconds collision occurs at, index of cars that collided, speed of slowest car in collision, position they collide at)
+        #3
+        #pop the one with the earliest collision time'
+        #4 mark the answer for the former car. the latter car basically remains unchanged
+        #5 remove the former car from the array
+        #6 identify the next car to the left of the removed car, and add its collision info to the heap
+        #7a mark the car to be discarded as the removed one
+        #7 repeat, popping, and if the popped info used the discarded car, don't use it, just keep popping
+        #continue doing this until nothing is onthe heap
+        #9 also, if there is no collision between a and b because b escapes a, don't add to the heap
+        
+        #10 maybe keep an array cars left to the left, of a couont of unanswered for cars to the left
+        #of a given index
+        #or like the leftmost index of the leftmost unanswered for car
+        #which would start at 0
+        #then you can 01 lookup if for an ind1, there are any more unaswered for cars to its left
+        
+        leftmost = 0
+        
+        n = len(cars)
+        ans= [-1]*n
+        
+        #1
+        import heapq
+        
+        heap = []
+        
+        def getnextdata(cars1,cars2):
+            
+            p1,s1 = cars1
+            p2,s2 = cars2
+            if s2>=s1 and p2> p1:
+                return -1
+            secs = (p2-p1)/(s1-s2)
+            pos = p1 + s1*secs
+            slow = s2
+            return secs,pos,slow
+            
+            
+        for i in range(n-1):
+            x = getnextdata(cars[i],cars[i+1])
+            if x==-1:
+                continue
+            secs,pos,slow = x
+            ind1,ind2 = i,i+1
+            heapq.heappush(heap,[secs,pos,slow,ind1,ind2])
+        last = -1
+        print(heap)
+        def getnextleft():
+            nonlocal ans
+            nonlocal leftmost
+            nonlocal n
+            ind = leftmost + 1
+            while ind < n and ans[ind] != -1:
+                ind += 1
+            if ind < n:
+                leftmost = ind
+            else:
+                leftmost = float('inf')
+        while heap:
+            x = heapq.heappop(heap)
+            #print(x)
+            secs,pos,slow,ind1,ind2 = x
+            if ind1 == last or ind2 == last:
+                continue
+            if ans[ind1] != -1:
+                continue
+            ans[ind1] = secs
+            if ind1 == leftmost:
+                getnextleft()
+                continue
+            if ind1==0:
+                continue
+            nextind1 = ind1-1
+            while nextind1 >= 0 and ans[nextind1] != -1:
+                nextind1 -= 1
+            if nextind1 == -1:
+                continue
+            #print(ind1,nextind1,ind2)
+            y = getnextdata(cars[nextind1],cars[ind2])
+            last = ind1
+            if y==-1:
+                continue
+            secs,pos,slow = y
+            heapq.heappush(heap,[secs,pos,slow,nextind1,ind2])
+        return ans
+        
+        
+        #
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
