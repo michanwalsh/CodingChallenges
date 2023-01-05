@@ -1,0 +1,33 @@
+class Solution:
+    def numberOfWays(self, corridor: str) -> int:
+        #needs even number ofo seats
+        #first divider needs to come after first two seats, before third seat
+        #could be any number of plants in between 2nd and 3rd, how many plants is how many places to place that divider, but add 1
+        
+        #so just multiply this number every time you come to it, ie every time there's an even seat ---> odd set after it
+        
+        ans = 1
+        last = 0
+        freq = collections.Counter(corridor)
+        if freq['S']%2 or 'S' not in freq:
+            return 0
+        if freq['S']==2:
+            return 1
+        seats = 0
+        for i in range(len(corridor)):
+            
+            let = corridor[i]
+            if let=='S':
+                if seats ==0:
+                    seats+=1
+                    continue
+                if not seats%2:
+                    ans*=(i-last)
+                    seats += 1
+                    
+                else:
+                    last =i
+                    seats += 1
+                    continue
+       # ans*= len(corridor)-last
+        return ans%(10**9 + 7)
