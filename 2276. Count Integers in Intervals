@@ -1,0 +1,89 @@
+class CountIntervals:
+
+    def __init__(self):
+        #have our set but don't use it
+        #use list
+        #mark intervals to delete
+        #aka all affected by new interval
+        #to be replaced by new interval, which may be extended if only partially overlaps with certain intervals
+        #if int affect is fully submerged in new, fully deleted
+        #aka fully subtracted from count before new int count is added
+        #if overlap, min or max is left or right on new interval
+        #then just subtract the full overlapped interval
+        #if min is new, fully sub. if not, it's ok
+        self.c = 0
+        self.ints = []
+        self.sets = set()
+        self.rights = []
+        self.len = 0
+    def add(self, left: int, right: int) -> None:
+        #find first int whos right is not greater than new's left
+        #find first int who's left is not smaller than new's right
+        #all intervals inbetween will be affected, removed
+        #don't want to double count a number though, aka not inclusive
+        #so if edges touch it counts as overlap
+        x = bisect.bisect_left(self.ints, left, key=lambda x:x[1])
+        #x is first intersecting interval
+        y = bisect.bisect_right(self.ints, right, key=lambda x:x[0])
+        #y is first non inter interval
+        
+        
+        if x==self.len:
+            self.ints.append([left,right])
+            # self.rights.append([right,left])
+            self.sets.add((left,right))
+            self.len += 1
+            self.c += right - left + 1
+            return
+        # if x==0 and right < self.ints[x][0]:
+        if y==0:
+            self.ints.insert(0,[left,right])
+            self.sets.add((left,right))
+            self.len +=1
+            self.c += right-left+1
+            return
+        
+        #check if new left, new right
+        # print(x,y,self.ints)
+        # print(left,right)
+        # print(self.len)
+        if x==y:
+            self.ints.insert(x, [left,right])
+            self.c += right-left + 1
+            self.sets.add((left,right))
+            self.len += 1
+            return
+        nl = min(left, self.ints[x][0])
+        nr = max(right, self.ints[y-1][1])
+        toremove = []
+        # print(nl,nr,x,y,self.c,self.ints,self.rights)
+        for inti in range(x+1,y):
+            toremove.append((self.ints[inti]))
+            
+        
+            
+            
+        for lr,rr in toremove:
+            self.c -= rr-lr+1
+            self.ints.remove([lr,rr])
+            
+            self.len -= 1
+            
+        self.c += nr-nl + 1
+        
+        self.c -= self.ints[x][1]-self.ints[x][0] + 1
+        self.ints[x] = [nl,nr]
+        # self.rights = self.rights[:x] + [nr,nl] + self.rights[x:]
+        self.sets.add((nl,nr))
+            
+        
+        #don't forget to change len
+
+    def count(self) -> int:
+        return self.c
+
+
+# Your CountIntervals object will be instantiated and called as such:
+# obj = CountIntervals()
+# obj.add(left,right)
+# param_2 = obj.count()
