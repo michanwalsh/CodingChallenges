@@ -1,0 +1,140 @@
+class Solution:
+    def kIncreasing(self, arr: List[int], k: int) -> int:
+        #start from end, 
+        
+        #we can think of chains of numbers + their multiples of k that interact with each other
+        
+        #chains never interact with eachother
+        
+        #given a chain how to fix it optimally
+        
+        #put the chain into an array
+        #1 0 4 2 6
+        #if we keep the 1st, if there's a problem with the second, let's just make the second equal to first
+        #
+        #so try keeping every index
+        #by going back from that index making them either equal to or less than that index
+        #and record the smallest number of changes 
+        
+        #4156856
+        
+        #let's say you pick something as your keeper middle
+        #as you go left, when encountering errors you know what to do (change i-1 to i)
+        #but encountering non errors you don't know whether it's better to leave i-1 or make it i
+        
+        #but you should know by the time you get to that i-1 what the best cost of leaving it as is, is, since you would have encountered that one as a middle already and thus have left as is
+        #so you can compare: cost of leaving it (already recorded) vs 1 + cost of changing it to be ==i
+        #so you only have to try changing it to i
+        #so every left<-, you'll only change it to i
+        
+        newarr = copy.deepcopy(arr)
+        newarr.sort()
+        if newarr==arr:
+            return 0
+        
+        
+        def fixchain(chain):
+            leftmids = [None for i in chain]
+            rightmids = [None for i in chain]
+            leftmemo = {}
+            rightmemo = {}
+            def trymid(i):
+                nonlocal chain
+                nonlocal leftmids
+                nonlocal rightmids
+                nonlocal leftmemo
+                nonlocal rightmemo
+                tryleft = 0
+                
+                def goleft(i,curi):
+                    nonlocal leftmids
+                    nonlocal chain
+                    nonlocal leftmemo
+                    
+                    
+                    if (i,curi) in leftmemo:
+                        return leftmemo[(i,curi)]
+                    
+                    if i==0:
+                        return 0
+                    ans = 0
+                    if chain[i-1] > curi:
+                        ans= 1 + goleft(i-1,curi)
+                    else:
+                        ans = min(1 + goleft(i-1,curi), goleft(i-1,chain[i-1]))
+                    leftmemo[(i,curi)]=ans
+                    return ans
+                    
+                tryleft = goleft(i,chain[i])
+                leftmids[i] = tryleft
+                
+                rightmemo
+                def goright(i,curi):
+                    nonlocal rightmids
+                    nonlocal chain
+                    nonlocal rightmemo
+                    if (i,curi) in rightmemo:
+                        return rightmemo[(i,curi)]
+                    if i==len(chain)-1:
+                        return 0
+                    if chain[i+1] < curi:
+                        ans= 1 + goright(i+1,curi)
+                    else:
+                        ans= min(1+goright(i+1,curi),goright(i+1,chain[i+1]))
+                    rightmemo[(i,curi)] = ans
+                    return ans
+                
+                
+                        
+                tryright = goright(i,chain[i])
+                rightmids[i] = tryright
+                return tryleft+tryright
+                
+            ans = float('inf')
+            for i in range(len(chain)):
+                ans = min(trymid(i),ans)
+            
+            return ans
+                    
+                
+              
+        
+        
+        
+        
+        
+        
+        
+        def lis(arr):
+            
+            subs = []
+            for i in range(len(arr)):
+                if i==0:
+                    subs.append(arr[i])
+                    continue
+                if arr[i] >= subs[-1]:
+                    subs.append(arr[i])
+                else:
+                    x = bisect.bisect_left(subs,arr[i]+1)
+                    subs[x] = arr[i]
+            return len(subs)
+            
+        ans = 0
+        n =len(arr)
+        seen = [False for i in arr]
+        for i,a in enumerate(seen):
+            if a:
+                continue
+            chain = [arr[i]]
+            seen[i] = True
+            j = i
+            while j < n:
+                j+=k
+                if j < n:
+                    chain.append(arr[j])
+                    seen[j] = True
+            
+            ans += len(chain)-lis(chain)
+        
+        return ans
+            
