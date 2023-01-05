@@ -1,0 +1,71 @@
+class Solution:
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        #any numsi k or greater can't be part of a good sub
+        #any sub of len 10 or greater cant be a good sub
+        #or len 4 or greater, cause 1 1 1 1 = 4 * 4 = 16
+        # 1 1 1 works though
+        #nvm that's for k = 10 k could be whatever
+        #general formula?
+        
+        #brute force, check all chars as begin of sub, stop once exeed and move onto next char
+        #or use binary search, any sub's sub should work if the sub works
+        #binary to find the rightmost sub that works for a char
+        #presums
+        #
+        presum = [0]
+        for val in nums:
+            presum.append(presum[-1] + val)
+            
+        n = len(nums)
+        ans = 0
+        lastleft = -1
+        if sum(nums)*len(nums) < k:
+            return int((len(nums)*(len(nums)+1))/2)
+        def search(leftind):
+            
+            nonlocal n
+            nonlocal ans
+            nonlocal presum
+            nonlocal lastleft
+            if nums[leftind] >= k:
+                return
+            if nums[leftind] >= k/2:
+                ans += 1
+                return
+            
+            leftchar= nums[leftind]
+            def getscore(m, leftind):
+                
+                nonlocal presum
+                
+                sums = presum[m+1] - presum[leftind]
+                leng = m-leftind + 1
+                score = sums*leng
+                # print(leftind,m,score, score<k)
+                return score < k
+            
+            l,r = max(lastleft,0,leftind), n-1
+            lastgood = -1
+            while l <=r:
+                mid = (l+r)//2
+                if getscore(mid, leftind):
+                    lastgood = mid
+                    l = mid+1
+                else:
+                    r = mid-1
+            if lastgood < 0:
+                return
+            lastleft = lastgood
+            
+            # print(leftind,lastgood)
+            count = lastgood - leftind + 1
+            ans += count
+        for i in range(n):
+            search(i)
+        return int(ans)
+            
+            
+            
+            
+            
+            
