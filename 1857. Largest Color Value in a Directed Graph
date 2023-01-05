@@ -1,0 +1,109 @@
+class Solution:
+    def largestPathValue(self, colors: str, edges: List[List[int]]) -> int:
+        #detect cycle in directed graph
+        #topological sort
+        #you'd want to search from nodes with the lowest in degree first
+        #once you've visited a node you'll have searched from it as well so there's no point in searching from it again
+        
+        #but when you're visiting a node you have to continue the largest path up to that node along all of its outgoing edges
+        #actually, revisit a node if you're visiting it with a higher incoming path than it currently has
+        #maybe don't revisit but replace its largest outgoing with 
+        #maybe try to record largest incoming for any node
+        #maybe instead of dfs, bfs in indegree order
+        #search a node 
+        #it shouldn't contain a cycle, so keep track of path maybe?
+        #
+        #search should return the dp which is max num vert of any color starting from node to avoid research
+        #then build upon outgoing nodes for the dp of current node
+        #there have to be at least 1 node with no in degree or else cycle
+        #only search those with 0 indegree, return max of dp for those nodes
+        #
+        
+        #build outgoing list and incoming list
+        #
+        #compile set of colors
+        #create dp for nodes and colors, init at 0
+        
+        
+        #first do a cycle check dfs with path algorithm
+        
+        visited = set()
+        ans = 0
+        out = collections.defaultdict(list)
+        inc = collections.defaultdict(list)
+        
+        if not edges:
+            return 1 if colors != '' else 0
+        
+        nodes = set()
+        cols = set()
+        for a,b in edges:
+            out[a].append(b)
+            inc[b].append(a)
+            nodes.add(a)
+            nodes.add(b)
+            cols.add(colors[a])
+            cols.add(colors[b])
+        
+        seen = [False for _ in range(len(colors))]
+        stack = [False for _ in range(len(colors))]
+        cyc = False
+        def check(node):
+            nonlocal cyc
+            nonlocal seen
+            nonlocal stack
+            if cyc:
+                return
+            for nei in out[node]:
+                if not seen[nei]:
+                    seen[nei] = True
+                    stack[nei] = True
+                    check(nei)
+                    stack[nei] = False
+                else:
+                    if stack[nei]:
+                        cyc = True
+                        return
+                
+           
+        for node in nodes:
+            if not seen[node]:
+                seen[node] = True
+                stack[node] = True
+                check(node)
+                stack[node] = False
+            if cyc:
+                return -1
+        if cyc:
+            return -1
+           
+        n = len(nodes)
+            
+        dp = collections.defaultdict(int)
+        
+        def dfs(node):
+            nonlocal ans
+            if node in visited:
+                return
+            visited.add(node)
+            i = node
+            for nei in out[node]:
+                if nei not in visited:
+                    dfs(nei)
+                for col in cols:
+                    dp[(i,col)] = max(dp[(nei,col)], dp[(i,col)])
+                    
+            curcol = colors[node]
+            dp[(i,curcol)] += 1
+            ans = max(ans, dp[(i,curcol)])
+        for node in nodes:
+            if node not in inc:
+                dfs(node)
+        return ans      
+                
+                
+                
+                
+                
+                
+                
