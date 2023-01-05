@@ -1,0 +1,43 @@
+class Solution:
+    def minimumEffort(self, tasks: List[List[int]]) -> int:
+        #upper bound would be sum of all minimums
+        #to try an start amount, brute all orders?
+        #we only need to find one valid path
+        #try dfsing on a task, passing new start and a mask of untaken drinks
+        #once all drinks are taken the start amount is valid
+        #if can't dfs on a task, return
+        #sort tasks by difference first, then actual ascending after that
+        #idk but that seems to be the key
+        
+        l,r = sum([a for a,b in tasks]), sum([b for a,b in tasks])
+        
+        tasks.sort(key=lambda x: ((x[1]-x[0])*-1, x[0]))
+        
+        def valid(m):
+            start = m
+            for i in range(len(tasks)):
+                act,mn = tasks[i]
+                if start <mn:
+                    return False
+                if start - act <0:
+                    return False
+                start -= act
+            return True
+        
+        
+        
+        
+        
+        ans = r
+        while l<=r:
+            m = (l+r)//2
+            
+            if valid(m):
+                ans = m
+                r = m-1
+            else:
+                l = m+1
+        
+        return ans
+        
+        
